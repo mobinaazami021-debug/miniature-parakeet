@@ -3,86 +3,46 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>آزمایشگاه بازی‌محور — هم‌نهشتی مثلث‌ها</title>
-
+<title>آزمایشگاه هم‌نهشتی — حالت بازی (نسخهٔ هوشمند کم‌دقت)</title>
 <style>
 :root{
   --bg1:#fff7fb; --bg2:#fff1e6;
-  --card:#fff; --muted:#6b7280;
   --accent1:#ff9aa2; --accent2:#ffb347; --accent3:#60a5fa;
-  font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --muted:#64748b; --card:#fff;
+  font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
 }
-
-html,body{height:100%;margin:0;padding:0;background:linear-gradient(160deg,var(--bg1),var(--bg2));color:#17202A}
-.container{max-width:1100px;margin:18px auto;padding:12px}
-.header{
-  display:flex;gap:12px;align-items:center;justify-content:space-between;
-  background:linear-gradient(90deg,rgba(255,154,162,0.10), rgba(96,165,250,0.04));
-  padding:12px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.06);
-}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(160deg,var(--bg1),var(--bg2));color:#102028}
+.container{max-width:1100px;margin:14px auto;padding:12px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px;background:linear-gradient(90deg,rgba(255,154,162,0.08),rgba(96,165,250,0.04));padding:10px;border-radius:12px}
 .brand{display:flex;gap:10px;align-items:center}
-.logo{
-  width:64px;height:64px;border-radius:12px;background-image:url('/mnt/data/IMG_F851B57E-58E3-48C7-AF62-CD9708122FF0.jpeg');
-  background-size:cover;background-position:center;border:3px solid rgba(255,255,255,0.7);
-}
-.title h1{margin:0;font-size:1.05rem;color:#35163f}
+.logo{width:60px;height:60px;border-radius:10px;background-image:url('/mnt/data/IMG_DFEC6089-D3CA-4926-8D50-CE77BC643B1C.jpeg');background-size:cover;background-position:center;border:2px solid rgba(255,255,255,0.6)}
+.title h1{margin:0;font-size:1.05rem;color:#2d0633}
 .title p{margin:0;font-size:0.85rem;color:var(--muted)}
-
-/* nav */
-.top-actions{display:flex;gap:8px;align-items:center}
-.btn{padding:8px 12px;border-radius:12px;border:none;cursor:pointer;font-weight:700}
-.btn-primary{background:linear-gradient(180deg,var(--accent2),var(--accent1));color:#031023}
-.btn-ghost{background:transparent;border:2px solid rgba(0,0,0,0.06);color:#031023}
-
-/* layout */
-.main{display:grid;grid-template-columns:1fr 340px;gap:16px;margin-top:16px}
-.board-card{background:linear-gradient(180deg,#fffefc,#fff7f2);padding:12px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.04)}
-.boards{display:flex;gap:12px;flex-direction:column;align-items:center}
-.boards-top{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:8px}
+.controls{display:flex;gap:8px;align-items:center}
+.btn{padding:8px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+.btn-primary{background:linear-gradient(180deg,var(--accent2),var(--accent1));color:#041428}
+.btn-ghost{background:transparent;border:2px solid rgba(0,0,0,0.06);color:#041428}
+.layout{display:grid;grid-template-columns:1fr 360px;gap:14px;margin-top:14px}
+.board{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 8px 24px rgba(2,6,23,0.06)}
 .canvas-wrap{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-
-/* canvas styling — شطرنجی */
-.canvas {
-  width: 340px;
-  height: 340px;
-  border-radius:12px;
-  border:3px solid rgba(0,0,0,0.06);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-  background-color:#fff;
-  /* chessboard pattern */
+.canvas{width:320px;height:320px;border-radius:12px;border:3px solid rgba(0,0,0,0.06);background:#fff;
+  /* شطرنجی */
   background-image:
     linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px),
     linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px);
-  background-size: 28px 28px;
-  touch-action: none;
+  background-size: 22px 22px;
+  touch-action:none;
+  box-shadow:0 10px 30px rgba(2,6,23,0.04);
 }
-
-/* panel (راهنما، اثبات، بازی) */
-.panel{background:var(--card);padding:12px;border-radius:14px;height:100%;position:relative}
-.panel h3{margin-top:0}
-.info{font-size:14px;color:var(--muted);margin-bottom:8px}
-.kv{background:linear-gradient(90deg,#fff,#fff7f2);padding:10px;border-radius:10px;margin-bottom:8px}
-.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,var(--accent1),var(--accent3));color:#021428;font-weight:800;margin-right:6px;font-size:13px}
-
-/* proof box */
-.proof {background:#fff7fb;border-radius:10px;padding:10px;margin-top:8px;border:1px dashed rgba(0,0,0,0.04)}
-.proof h4{margin:6px 0 4px 0}
-.proof p{margin:4px 0;color:#111}
-
-/* game area */
-.game-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.score{font-weight:800;color:#0b1220;background:linear-gradient(90deg, rgba(125,211,252,0.13), transparent);padding:8px;border-radius:8px}
+.panel{background:linear-gradient(180deg,#fffefc,#fff7f2);padding:12px;border-radius:12px}
 .small{font-size:13px;color:var(--muted)}
-
-/* mobile */
-@media (max-width:980px){
-  .main{grid-template-columns:1fr; padding-bottom:40px}
-  .canvas{width:86vw;height:86vw}
-  .panel{order:3}
-}
-
-/* playful handle glow */
-.handle { width:16px;height:16px;border-radius:999px;background:linear-gradient(90deg,var(--accent1),var(--accent2));box-shadow:0 6px 18px rgba(255,154,162,0.4);display:flex;align-items:center;justify-content:center;color:#021428;font-weight:800;font-size:11px }
+.kv{background:#fff;border-radius:10px;padding:8px;margin:8px 0;border:1px dashed rgba(0,0,0,0.04)}
+.proof h4{margin:6px 0 4px 0}
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,var(--accent1),var(--accent3));color:#021428;font-weight:800;margin-right:6px}
+.game-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.handle{width:16px;height:16px;border-radius:999px;background:linear-gradient(90deg,var(--accent1),var(--accent2));box-shadow:0 6px 18px rgba(255,154,162,0.4)}
+@media (max-width:980px){.layout{grid-template-columns:1fr}.canvas{width:86vw;height:86vw}}
 </style>
 </head>
 <body>
@@ -91,108 +51,78 @@ html,body{height:100%;margin:0;padding:0;background:linear-gradient(160deg,var(-
     <div class="brand">
       <div class="logo" aria-hidden="true"></div>
       <div class="title">
-        <h1>آزمایشگاه بازی‌محور — هم‌نهشتی مثلث‌ها</h1>
-        <p>تمرین تعاملی برای پایهٔ نهم — حالت بازی و اثبات خودکار</p>
+        <h1>آزمایشگاه هم‌نهشتی (نسخهٔ بازی‌محور)</h1>
+        <p>هوشمند (دقتِ ملایم)، شطرنجی و کارتونی — مخصوص کلاس نهم</p>
       </div>
     </div>
-
-    <div class="top-actions">
-      <button id="openTutorial" class="btn btn-ghost">آموزش</button>
-      <div class="score badge">امتیاز: <span id="score">0</span></div>
-      <button id="resetAll" class="btn btn-ghost">پاک کن</button>
+    <div class="controls">
+      <button id="openTutor" class="btn btn-ghost">آموزش</button>
+      <div class="badge">امتیاز: <span id="score">0</span></div>
+      <button id="resetBtn" class="btn btn-ghost">پاک کن</button>
     </div>
   </div>
 
-  <div class="main">
-    <div class="board-card">
-      <div class="boards-top">
-        <div>
-          <strong class="small">دو بوم تعاملی — نقاط را لمس/کلیک و بکش</strong>
-        </div>
-        <div class="small">پس‌زمینهٔ شطرنجی — برای تمرین اندازه‌گیری</div>
+  <div class="layout">
+    <div class="board">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong class="small">دو بوم تعاملی (لمس/کلیک/درگ)</strong></div>
+        <div class="small">پس‌زمینهٔ شطرنجی برای اندازه‌گیری</div>
       </div>
 
-      <div class="canvas-wrap">
-        <div>
-          <div style="text-align:center;margin-bottom:6px"><strong>مثلث اول</strong></div>
-          <canvas id="canvasA" class="canvas" width="340" height="340" aria-label="مثلث اول"></canvas>
-        </div>
-        <div>
-          <div style="text-align:center;margin-bottom:6px"><strong>مثلث دوم</strong></div>
-          <canvas id="canvasB" class="canvas" width="340" height="340" aria-label="مثلث دوم"></canvas>
-        </div>
+      <div class="canvas-wrap" style="margin-top:12px;justify-content:center">
+        <div style="text-align:center"><div class="small">مثلث اول</div><canvas id="cA" class="canvas" width="320" height="320"></canvas></div>
+        <div style="text-align:center"><div class="small">مثلث دوم</div><canvas id="cB" class="canvas" width="320" height="320"></canvas></div>
       </div>
 
       <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+        <button id="randA" class="btn">مثلث اول تصادفی</button>
+        <button id="randB" class="btn">مثلث دوم تصادفی</button>
         <button id="checkBtn" class="btn btn-primary">بررسی هم‌نهشتی</button>
-        <button id="gameBtn" class="btn btn-primary">شروع چالش بازی</button>
-        <button id="snapBtn" class="btn">چسباندن (Snap)</button>
+        <button id="gameBtn" class="btn btn-primary">شروع چالش</button>
       </div>
     </div>
 
     <aside class="panel">
       <h3>راهنما و اثبات</h3>
-      <div class="kv info">بعد از اینکه دو مثلث را رسم یا جابه‌جا کردی، روی «بررسی هم‌نهشتی» بزن. اثباتِ فرض و حکم به صورت خودکار نمایش داده می‌شود.</div>
+      <div class="kv small">بعد از رسم/تنظیم مثلث‌ها، دکمهٔ «بررسی هم‌نهشتی» را بزن. روشِ برقرار را با فرض و حکم و اثبات خلاصه نمایش می‌دهد.</div>
 
-      <div>
-        <div class="small">حالت تشخیص فعلی:</div>
-        <div id="method" class="kv small">—</div>
+      <div><div class="small">روش تشخیص: <strong id="method">—</strong></div></div>
 
-        <div class="proof" id="proofBox">
-          <h4>فرض</h4>
-          <p id="farz">—</p>
-          <h4>حکم</h4>
-          <p id="hokm">—</p>
-          <h4>اثبات (خلاصه)</h4>
-          <p id="proofText">—</p>
-        </div>
+      <div class="proof kv">
+        <h4>فرض</h4><p id="farz">—</p>
+        <h4>حکم</h4><p id="hokm">—</p>
+        <h4>اثبات (خلاصه)</h4><p id="proofText">—</p>
+      </div>
 
-        <div class="game-row">
-          <div class="score">سطح: <span id="level">1</span></div>
-          <div class="score">امتیاز: <span id="scorePanel">0</span></div>
-        </div>
+      <div class="game-row">
+        <div class="badge">سطح: <span id="level">1</span></div>
+        <div class="badge">امتیاز پنل: <span id="scorePanel">0</span></div>
+      </div>
 
-        <div style="margin-top:10px">
-          <div class="small">دکمه‌های کمکی:</div>
-          <button id="randA" class="btn">مثلث اول تصادفی</button>
-          <button id="randB" class="btn">مثلث دوم تصادفی</button>
-          <button id="hintBtn" class="btn">راهنما</button>
-        </div>
-
+      <div style="margin-top:10px">
+        <div class="small">کمک‌ها:</div>
+        <button id="snapBtn" class="btn">چسباندن</button>
+        <button id="hintBtn" class="btn">راهنما</button>
       </div>
     </aside>
   </div>
 </div>
 
-<!-- مودال آموزش -->
-<div id="tutorialModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;align-items:center;justify-content:center">
-  <div style="background:white;padding:18px;border-radius:12px;max-width:720px;margin:auto;text-align:right;direction:rtl">
-    <h3>راهنمای سریع</h3>
-    <ol style="text-align:right">
-      <li>روی هر بوم تا ۳ نقطه بزن یا کلیک کن تا مثلث رسم شود.</li>
-      <li>نقاط را بکش (drag) تا اضلاع و زوایا تغییر کنند.</li>
-      <li>روی «بررسی هم‌نهشتی» بزن تا سیستم روش هم‌نهشتی را تشخیص دهد و <strong>فرض</strong> و <strong>حکم</strong> را نمایش دهد.</li>
-      <li>در حالت بازی، هدف را دنبال کن و امتیاز بگیر.</li>
-    </ol>
-    <div style="text-align:left;margin-top:10px">
-      <label><input id="dontShow" type="checkbox"> دیگر نمایش نده</label>
-      <button id="closeTutorial" class="btn" style="margin-right:8px">باشه، شروع</button>
-    </div>
-  </div>
-</div>
-
-<!-- صدا (مسیر محلی که آپلود شده) -->
-<audio id="sndClick" src="/mnt/data/magic.wav"></audio>
+<!-- صوت (مسیر محلی) -->
+<audio id="snd" src="/mnt/data/magic.wav"></audio>
 
 <script>
-/* =====================================================
-   Helper geometry functions (فاصله، زاویه، قائمه بودن)
-   ===================================================== */
+/* ================== تنظیمات دقتِ هوشمند (نه زیاد دقیق) ================== */
+// دقت مقادیر را کمتر (آستانهٔ بزرگتر) قرار می‌دهیم تا «نه خیلی دقیق» عمل کند:
+const TOL_SIDE = 6.0;   // پیکسل tolerance برای اضلاع
+const TOL_ANGLE = 4.5;  // درجه tolerance برای زاویه
+
+/* ================== توابع هندسی ================== */
 function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
 function angle(A,B,C){
   const AB = dist(A,B), CB = dist(C,B), AC = dist(A,C);
-  const cos = (AB*AB + CB*CB - AC*AC) / (2*AB*CB);
-  return Math.acos(Math.max(-1,Math.min(1,cos))) * 180 / Math.PI;
+  const cosv = (AB*AB + CB*CB - AC*AC) / (2*AB*CB);
+  return Math.acos(Math.max(-1,Math.min(1,cosv))) * 180/Math.PI;
 }
 function isRight(tri){
   const angs = [
@@ -200,285 +130,155 @@ function isRight(tri){
     angle(tri[0],tri[1],tri[2]),
     angle(tri[0],tri[2],tri[1])
   ];
-  return angs.some(a => Math.abs(a - 90) < 1.2);
+  return angs.some(a=>Math.abs(a-90) < 3.0);
 }
 
-/* =====================================================
-   Canvas wrappers: نگهداری نقاط، درگ، رسم
-   ===================================================== */
-function CanvasInteractor(canvasId){
-  const canvas = document.getElementById(canvasId);
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const sizeW = canvas.width, sizeH = canvas.height;
-
-  // points: سه نقطه ممکن
-  let points = [];
-  let dragging = null;
-
+/* ================== wrapper برای هر canvas ================== */
+function CanvasBoard(id){
+  const c = document.getElementById(id), ctx = c.getContext('2d');
+  let pts = [], drag = null;
   function toLocal(e){
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX ?? e.touches?.[0]?.clientX) - rect.left;
-    const y = (e.clientY ?? e.touches?.[0]?.clientY) - rect.top;
-    return {x,y};
+    const r = c.getBoundingClientRect();
+    return {x: (e.clientX ?? e.touches?.[0]?.clientX) - r.left, y: (e.clientY ?? e.touches?.[0]?.clientY) - r.top};
   }
-
   function redraw(){
-    // clear and keep chess background (CSS handles background)
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    // draw triangle if 3 points
-    if(points.length === 3){
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      ctx.lineTo(points[1].x, points[1].y);
-      ctx.lineTo(points[2].x, points[2].y);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(255,154,162,0.12)';
-      ctx.fill();
-      ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.clearRect(0,0,c.width,c.height);
+    // اگر 3 نقطه => رسم مثلث
+    if(pts.length===3){
+      ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y); ctx.lineTo(pts[1].x,pts[1].y); ctx.lineTo(pts[2].x,pts[2].y); ctx.closePath();
+      ctx.fillStyle='rgba(255,154,162,0.12)'; ctx.fill();
+      ctx.strokeStyle='#2b2b2b'; ctx.lineWidth=2; ctx.stroke();
     }
-    // draw handles
-    for(let i=0;i<points.length;i++){
-      const p = points[i];
-      ctx.beginPath();
-      ctx.fillStyle = '#ffb347'; ctx.strokeStyle = '#b84a6a'; ctx.lineWidth = 1.2;
-      ctx.arc(p.x,p.y,10,0,Math.PI*2);
-      ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#021428'; ctx.font = '12px Vazirmatn, system-ui'; ctx.fillText(['A','B','C'][i], p.x-5, p.y+5);
+    // دِراپ‌ها
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i];
+      ctx.beginPath(); ctx.arc(p.x,p.y,9,0,Math.PI*2); ctx.fillStyle='#ffb347'; ctx.fill();
+      ctx.strokeStyle='#b84a6a'; ctx.lineWidth=1.2; ctx.stroke();
+      ctx.fillStyle='#021428'; ctx.font='12px Vazirmatn, system-ui'; ctx.fillText(['A','B','C'][i],p.x-5,p.y+5);
     }
   }
-
-  canvas.addEventListener('pointerdown', e=>{
+  c.addEventListener('pointerdown', e=>{
     const pos = toLocal(e);
-    // if fewer than 3 points, add
-    if(points.length < 3){
-      points.push(pos);
-      playClick();
-      redraw(); return;
-    }
-    // otherwise search nearest handle
-    let nearest = null, minD = 9999, idx = -1;
-    points.forEach((p,i)=>{
-      const d = dist(p,pos);
-      if(d < minD && d < 22){ minD = d; nearest = p; idx = i; }
-    });
-    if(nearest){ dragging = idx; canvas.setPointerCapture(e.pointerId); playClick(); }
+    if(pts.length < 3){ pts.push(pos); playSnd(); redraw(); return; }
+    // پیدا کردن نزدیک‌ترین نقطه برای درگ
+    let nearest=-1, mind=9999;
+    pts.forEach((p,i)=>{ const d=dist(p,pos); if(d<mind && d<20){ mind=d; nearest=i; }});
+    if(nearest>=0){ drag = nearest; c.setPointerCapture(e.pointerId); playSnd(); }
   });
-
-  canvas.addEventListener('pointermove', e=>{
-    if(dragging === null) return;
+  c.addEventListener('pointermove', e=>{
+    if(drag===null) return;
     const pos = toLocal(e);
-    // clamp inside canvas
-    pos.x = Math.max(8, Math.min(canvas.clientWidth - 8, pos.x));
-    pos.y = Math.max(8, Math.min(canvas.clientHeight - 8, pos.y));
-    points[dragging].x = pos.x; points[dragging].y = pos.y;
-    redraw();
+    pos.x = Math.max(8, Math.min(c.clientWidth-8, pos.x));
+    pos.y = Math.max(8, Math.min(c.clientHeight-8, pos.y));
+    pts[drag].x = pos.x; pts[drag].y = pos.y; redraw();
   });
-
-  canvas.addEventListener('pointerup', e=>{
-    if(dragging !== null){
-      try{ canvas.releasePointerCapture(e.pointerId); }catch(_){}
-      dragging = null;
-      playSuccess();
-    }
-  });
-
-  function clear(){ points = []; redraw(); }
-  function setPoints(arr){ points = arr.map(p=>({x:p.x,y:p.y})); redraw(); }
-  function getPoints(){ return points.slice(); }
-  function ensureThreeRandom(baseX){
-    if(points.length < 3){
-      const x = baseX + Math.random()*80;
-      const y = 60 + Math.random()*160;
-      setPoints([{x:x,y:y},{x:x+80+Math.random()*20,y:y-40},{x:x+110+Math.random()*10,y:y+60}]);
-    }
+  c.addEventListener('pointerup', e=>{ if(drag!==null){ try{c.releasePointerCapture(e.pointerId);}catch(_{}); drag=null; playSnd(); }});
+  function clear(){ pts=[]; redraw(); }
+  function setPoints(arr){ pts = arr.map(p=>({x:p.x,y:p.y})); redraw(); }
+  function getPoints(){ return pts.slice(); }
+  function ensureRandom(baseX){
+    if(pts.length>=3) return;
+    const x = baseX + Math.random()*80; const y = 60 + Math.random()*140;
+    setPoints([{x:x,y:y},{x:x+80+Math.random()*20,y:y-40},{x:x+110+Math.random()*30,y:y+60}]);
   }
-
-  // initial redraw
   redraw();
-
-  return {clear, setPoints, getPoints, ensureThreeRandom, redraw};
+  return {clear,setPoints,getPoints,ensureRandom,redraw};
 }
 
-/* =====================================================
-   صوت‌ها (Audio element از فایل آپلودی)
-   ===================================================== */
-const snd = document.getElementById('sndClick');
-function playClick(){ try{ snd.currentTime = 0; snd.play(); }catch(e){} }
-function playSuccess(){ try{ snd.currentTime = 0; snd.play(); }catch(e){} }
+/* ================== صوت ================== */
+const snd = document.getElementById('snd');
+function playSnd(){ try{ snd.currentTime=0; snd.play(); }catch(e){} }
+function playGood(){ try{ snd.currentTime=0; snd.play(); }catch(e){} }
 
-/* =====================================================
-   ساخت و راه‌اندازی صفحات
-   ===================================================== */
-const A = CanvasInteractor('canvasA');
-const B = CanvasInteractor('canvasB');
-
-document.getElementById('checkBtn').addEventListener('click', ()=> {
-  checkAndShow();
-});
-
-document.getElementById('resetAll').addEventListener('click', ()=> {
-  A.clear(); B.clear();
-  setStatus('—'); setProof('—','—','—');
-});
-
-document.getElementById('randA').addEventListener('click', ()=>{ A.ensureThreeRandom(40); });
-document.getElementById('randB').addEventListener('click', ()=>{ B.ensureThreeRandom(120); });
-
+/* ================== راه‌اندازی ================== */
+const A = CanvasBoard('cA'), B = CanvasBoard('cB');
+document.getElementById('randA').addEventListener('click', ()=> { A.ensureRandom(40); });
+document.getElementById('randB').addEventListener('click', ()=> { B.ensureRandom(120); });
+document.getElementById('resetBtn').addEventListener('click', ()=> { A.clear(); B.clear(); setStatus('—'); setProof('—','—','—'); });
+document.getElementById('checkBtn').addEventListener('click', ()=> checkAndShow());
 document.getElementById('gameBtn').addEventListener('click', ()=> startGame());
-document.getElementById('snapBtn').addEventListener('click', ()=> snapTriangles());
+document.getElementById('snapBtn').addEventListener('click', ()=> snapAlign());
+document.getElementById('hintBtn').addEventListener('click', ()=> alert('راهنما: اضلاع/زاویه‌ها را تنظیم کن. سیستم به طور هوشمند یکی از معیارها را تشخیص می‌کند.'));
 
-/* =====================================================
-   تشخیص روش‌های هم‌نهشتی و نگارش فرض/حکم/اثبات
-   ===================================================== */
-function roundVal(x){ return Math.round(x*10)/10; }
-function eqn(a,b,eps=1.4){ return Math.abs(a-b) < eps; } // tolerance tuned for manual input
+let game = {level:1,score:0,target:null};
+function setScore(v){ document.getElementById('score').innerText = v; document.getElementById('scorePanel').innerText = v; }
+function setStatus(t){ document.getElementById('method').innerText = t; }
+function setProof(f,h,p){ document.getElementById('farz').innerText = f; document.getElementById('hokm').innerText = h; document.getElementById('proofText').innerText = p; }
+
+/* ================== هوشمندِ با دقت ملایم ================== */
+function approxEqual(a,b,eps){ return Math.abs(a-b) <= eps; }
 
 function checkAndShow(){
   const tA = A.getPoints(), tB = B.getPoints();
-  if(tA.length !== 3 || tB.length !==3){
-    alert('هر دو مثلث باید ۳ نقطه داشته باشند.');
-    return;
+  if(tA.length!==3 || tB.length!==3){ alert('هر دو مثلث باید سه نقطه داشته باشند.'); return; }
+  const sA = [dist(tA[0],tA[1]),dist(tA[1],tA[2]),dist(tA[2],tA[0])].sort((a,b)=>a-b);
+  const sB = [dist(tB[0],tB[1]),dist(tB[1],tB[2]),dist(tB[2],tB[0])].sort((a,b)=>a-b);
+  const angA = [angle(tA[1],tA[0],tA[2]), angle(tA[0],tA[1],tA[2]), angle(tA[0],tA[2],tA[1])];
+  const angB = [angle(tB[1],tB[0],tB[2]), angle(tB[0],tB[1],tB[2]), angle(tB[0],tB[2],tB[1])];
+  const angAs = angA.slice().sort((a,b)=>a-b), angBs = angB.slice().sort((a,b)=>a-b);
+
+  // هوشمند: اولویت چک: ض.ض.ض -> ض.ز.ض -> ز.ض.ز -> و.ض -> و.ز
+  let method='—', farz='—', hokm='—', proof='—';
+
+  // ض.ض.ض
+  if( approxEqual(sA[0],sB[0], TOL_SIDE) && approxEqual(sA[1],sB[1], TOL_SIDE) && approxEqual(sA[2],sB[2], TOL_SIDE) ){
+    method='ض.ض.ض'; farz='سه ضلع مثلث اول برابر سه ضلع مثلث دوم است.'; proof='طبق ض.ض.ض اگر سه ضلع متناظر برابر باشند، مثلث‌ها هم‌نهشت‌اند.'; hokm='دو مثلث هم‌نهشت‌اند.';
   }
-
-  // sides sorted
-  const sA = [dist(tA[0],tA[1]), dist(tA[1],tA[2]), dist(tA[2],tA[0])].sort((a,b)=>a-b);
-  const sB = [dist(tB[0],tB[1]), dist(tB[1],tB[2]), dist(tB[2],tB[0])].sort((a,b)=>a-b);
-
-  // angles (unsorted needed for some patterns)
-  const angA = [
-    angle(tA[1],tA[0],tA[2]),
-    angle(tA[0],tA[1],tA[2]),
-    angle(tA[0],tA[2],tA[1])
-  ];
-  const angB = [
-    angle(tB[1],tB[0],tB[2]),
-    angle(tB[0],tB[1],tB[2]),
-    angle(tB[0],tB[2],tB[1])
-  ];
-  const angAs = angA.slice().sort((a,b)=>a-b);
-  const angBs = angB.slice().sort((a,b)=>a-b);
-
-  // check each method
-  let method = null, farz = '—', hokm='دو مثلث هم‌نهشت‌اند.', proofText='خلاصهٔ اثبات...';
-
-  // ض.ض.ض (SSS)
-  if(eqn(sA[0],sB[0]) && eqn(sA[1],sB[1]) && eqn(sA[2],sB[2])){
-    method = 'ض.ض.ض';
-    farz = 'سه ضلع مثلث اول برابر سه ضلع مثلث دوم است.';
-    proofText = 'اگر سه ضلع یک مثلث با سه ضلع مثلث دیگر به طور متناظر برابر باشند، آن دو مثلث هم‌نهشت‌اند (ض.ض.ض).';
-  }
-  // ض.ز.ض (SAS) — دو ضلع و زاویهٔ بین‌شان
-  else if( (eqn(sA[0],sB[0]) && eqn(sA[2],sB[2]) && eqn(angAs[1],angBs[1])) ){
-    method = 'ض.ز.ض';
-    farz = 'دو ضلع و زاویهٔ بین آن‌ها در دو مثلث برابر است.';
-    proofText = 'اگر دو ضلع و زاویهٔ بین آن‌ها در دو مثلث برابر باشد، مثلث‌ها هم‌نهشت‌اند (ض.ز.ض).';
+  // ض.ز.ض (SAS) — دو ضلع متناظر و زاویه بین‌شان (زاویه میانی از زاویه‌های مرتب‌شده)
+  else if( (approxEqual(sA[0],sB[0],TOL_SIDE) && approxEqual(sA[2],sB[2],TOL_SIDE) && approxEqual(angAs[1],angBs[1],TOL_ANGLE)) ){
+    method='ض.ز.ض'; farz='دو ضلع و زاویهٔ بین آن‌ها در دو مثلث برابر است.'; proof='طبق ض.ز.ض دو ضلع و زاویهٔ بین آن‌ها، هم‌نهشتی را برقرار می‌کنند.'; hokm='دو مثلث هم‌نهشت‌اند.';
   }
   // ز.ض.ز (ASA)
-  else if( eqn(angAs[0],angBs[0]) && eqn(angAs[2],angBs[2]) && eqn(sA[1],sB[1]) ){
-    method = 'ز.ض.ز';
-    farz = 'دو زاویه و ضلع بین آن‌ها در دو مثلث برابر است.';
-    proofText = 'اگر دو زاویه و ضلع بین آن‌ها برابر باشند، مثلث‌ها هم‌نهشت‌اند (ز.ض.ز).';
+  else if( approxEqual(angAs[0],angBs[0],TOL_ANGLE) && approxEqual(angAs[2],angBs[2],TOL_ANGLE) && approxEqual(sA[1],sB[1],TOL_SIDE) ){
+    method='ز.ض.ز'; farz='دو زاویه و ضلع بین آن‌ها در دو مثلث برابر است.'; proof='طبق ز.ض.ز، دو زاویه و ضلع بین‌شان موجب هم‌نهشتی می‌شوند.'; hokm='دو مثلث هم‌نهشت‌اند.';
   }
-  // و.ض (RHS / وتر و ضلع قائمه) — هر دو قائمه و یک ضلع برابر
-  else if(isRight(tA) && isRight(tB) && eqn(sA[1],sB[1])){
-    method = 'و.ض';
-    farz = 'وتر و یک ضلع قائم در دو مثلث قائم برابر است.';
-    proofText = 'در مثلث‌های قائمه اگر وتر و یک ضلع قائمه برابر باشند، مثلث‌ها هم‌نهشت‌اند (و.ض).';
+  // و.ض (RHS)
+  else if( isRight(tA) && isRight(tB) && approxEqual(sA[1],sB[1],TOL_SIDE) ){
+    method='و.ض'; farz='در دو مثلث قائمه، وتر و یک ضلع قائم برابر است.'; proof='در مثلث‌های قائمه، اگر وتر و یک ضلع قائم برابر باشد، هم‌نهشتی برقرار است.'; hokm='دو مثلث قائمه هم‌نهشت‌اند.';
   }
-  // و.ز (وتر و زاویه) — هر دو قائمه و یک زاویه برابر
-  else if(isRight(tA) && isRight(tB) && eqn(angAs[1],angBs[1])){
-    method = 'و.ز';
-    farz = 'وتر و یک زاویه در دو مثلث قائم برابر است.';
-    proofText = 'در مثلث‌های قائمه اگر وتر و یک زاویهٔ دیگر برابر باشند، مثلث‌ها هم‌نهشت‌اند (و.ز).';
-  } else {
-    method = '—';
-    farz = '—';
-    hokm = '—';
-    proofText = 'هیچ‌یک از معیارهای ض.ض.ض، ض.ز.ض، ز.ض.ز، و.ض یا و.ز برقرار نیست.';
+  // و.ز
+  else if( isRight(tA) && isRight(tB) && approxEqual(angAs[1],angBs[1],TOL_ANGLE) ){
+    method='و.ز'; farz='در دو مثلث قائمه، وتر و یک زاویه برابر است.'; proof='در مثلث‌های قائمه، اگر وتر و یک زاویه برابر باشند، هم‌نهشتی برقرار است.'; hokm='دو مثلث قائمه هم‌نهشت‌اند.';
+  }
+  else {
+    method='—'; farz='—'; hokm='—'; proof='هیچ‌یک از معیارهای مورد نظر برقرار نیست (دقت سیستم ملایم است).';
   }
 
-  setStatus(method);
-  setProof(farz, hokm, proofText);
+  setStatus(method); setProof(farz,hokm,proof);
 
-  if(method !== '—'){ // give reward in game
-    incrementScore(10);
-    playSuccess();
-  } else {
-    playClick();
-  }
+  if(method!=='—'){ game.score += 10; setScore(game.score); playGood(); } else playSnd();
 }
 
-/* =====================================================
-   UI helpers
-   ===================================================== */
-function setStatus(txt){ document.getElementById('method').innerText = txt; }
-function setProof(f, h, p){ document.getElementById('farz').innerText = f; document.getElementById('hokm').innerText = h; document.getElementById('proofText').innerText = p; }
-function setScore(val){ document.getElementById('score').innerText = val; document.getElementById('scorePanel').innerText = val; }
-
-/* =====================================================
-   Simple game: مراحل تصادفی و اهداف (طول AB) — حالت بازی
-   ===================================================== */
-let game = {level:1, score:0, target:null};
+/* ================== ویژگی‌های بازی ================== */
 function startGame(){
-  game.level = 1; game.score = 0; game.target = null;
-  setScore(0); document.getElementById('level').innerText = 1;
+  game.level = 1; game.score = 0; setScore(0); document.getElementById('level').innerText = 1;
   nextRound();
 }
 function nextRound(){
-  // create random triangle on A and random on B, but B slightly different
-  A.ensureThreeRandom(40); B.ensureThreeRandom(160);
-  // set a target: match method at random (choose one of available methods)
+  A.ensureRandom(30); B.ensureRandom(150);
   const methods = ['ض.ض.ض','ض.ز.ض','ز.ض.ز','و.ض','و.ز'];
   game.target = methods[Math.floor(Math.random()*methods.length)];
-  document.getElementById('result').innerText = 'هدف این مرحله: ' + game.target;
+  document.getElementById('result')?.innerText && (document.getElementById('result').innerText = 'هدف: ' + game.target);
 }
-function incrementScore(n){
-  game.score += n; setScore(game.score);
-  document.getElementById('level').innerText = game.level;
-}
-
-/* snap helper (move B to roughly align with A) */
-function snapTriangles(){
+/* snap: کپی موقعیت مرکز و جابجایی */
+function snapAlign(){
   const tA = A.getPoints(), tB = B.getPoints();
-  if(tA.length !== 3) { A.ensureThreeRandom(40); return; }
-  // translate B to align centroids
-  const cxA = (tA[0].x + tA[1].x + tA[2].x)/3;
-  const cyA = (tA[0].y + tA[1].y + tA[2].y)/3;
-  const cxB = (tB[0]?.x || 0 + 0), cyB = (tB[0]?.y || 0 + 0);
-  if(tB.length !==3){ B.setPoints([{x:cxA+30,y:cyA-20},{x:cxA+90,y:cyA-60},{x:cxA+140,y:cyA+30}]); return; }
-  const cxB2 = (tB[0].x + tB[1].x + tB[2].x)/3;
-  const cyB2 = (tB[0].y + tB[1].y + tB[2].y)/3;
-  const dx = cxA - cxB2, dy = cyA - cyB2;
-  const newB = tB.map(p=>({x:p.x + dx, y:p.y + dy}));
-  B.setPoints(newB);
+  if(tA.length!==3) { A.ensureRandom(40); return; }
+  if(tB.length!==3){ B.setPoints([{x: tA[0].x+30, y: tA[0].y},{x:tA[1].x+30,y:tA[1].y},{x:tA[2].x+30,y:tA[2].y}]); return; }
+  const cxA = (tA[0].x+tA[1].x+tA[2].x)/3; const cyA=(tA[0].y+tA[1].y+tA[2].y)/3;
+  const cxB = (tB[0].x+tB[1].x+tB[2].x)/3; const cyB=(tB[0].y+tB[1].y+tB[2].y)/3;
+  const dx = cxA-cxB, dy = cyA-cyB;
+  B.setPoints(tB.map(p=>({x:p.x+dx,y:p.y+dy})));
 }
 
-/* =====================================================
-   Tutorial modal behavior
-   ===================================================== */
-document.getElementById('openTutorial').addEventListener('click', ()=> showTutorial());
-document.getElementById('closeTutorial').addEventListener('click', ()=> hideTutorial());
-document.getElementById('dontShow').addEventListener('change', (e)=> {
-  if(e.target.checked) localStorage.setItem('noTutor','1'); else localStorage.removeItem('noTutor');
-});
-function showTutorial(){ document.getElementById('tutorialModal').style.display = 'flex'; }
-function hideTutorial(){ document.getElementById('tutorialModal').style.display = 'none'; }
-if(!localStorage.getItem('noTutor')) setTimeout(()=> showTutorial(), 600);
+/* ================== init نمونه ================== */
+A.setPoints([{x:60,y:220},{x:150,y:80},{x:260,y:240}]);
+B.setPoints([{x:320,y:200},{x:400,y:90},{x:420,y:240}]);
+setScore(0); setStatus('—'); setProof('—','—','—');
 
-/* =====================================================
-   init: populate example triangles
-   ===================================================== */
-A.setPoints([{x:60,y:220},{x:140,y:80},{x:260,y:240}]);
-B.setPoints([{x:300,y:180},{x:380,y:80},{x:420,y:240}]);
-setScore(0);
-setStatus('—');
-setProof('—','—','—');
-
-/* small helper to show hint */
-document.getElementById('hintBtn').addEventListener('click', ()=>{
-  alert('راهنما: اضلاع و زوایا را با درگ کردن نقاط تنظیم کن تا یکی از حالت‌های ض.ض.ض، ض.ز.ض، ز.ض.ز، و.ض یا و.ز برقرار شود.');
-});
+/* ================== مودال آموزش ساده ================== */
+document.getElementById('openTutor').addEventListener('click', ()=> alert('آموزش: نقاط را کلیک کن تا مثلث رسم شود. نقاط را بکش و سپس «بررسی» را بزن. سیستم به صورت هوشمند یکی از معیارها را تشخیص می‌کند.'));
+document.getElementById('hintBtn')?.addEventListener('click', ()=> alert('راهنما: برای ض.ض.ض اضلاع را به هم نزدیک کن؛ برای ض.ز.ض دو ضلع و زاویهٔ بین را مساوی کن.'));
 </script>
 </body>
 </html>
