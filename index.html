@@ -1,65 +1,47 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>آزمایشگاه بازی‌محور مثلث‌ها — ریاضی نهم</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <title>آزمایشگاه هم‌نهشتی مثلث‌ها</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app">
-    <header class="topbar">
-      <div class="brand">
-        <h1>آزمایشگاه بازی‌محور مثلث‌ها 🎮📐</h1>
-        <p class="subtitle">همهٔ آزمایشگاه‌ها در یک صفحه — موبایل‌پسند</p>
-      </div>
-      <div class="head-actions">
-        <button id="openTutorial" class="btn">آموزش</button>
-        <div class="score-box">امتیاز: <span id="score">0</span></div>
-      </div>
-    </header>
 
-    <nav class="labs-nav" aria-label="انتخاب آزمایش">
-      <button class="lab-btn active" data-lab="build">آزمایش: ساخت مثلث</button>
-      <button class="lab-btn" data-lab="similar">آزمایش: شباهت</button>
-      <button class="lab-btn" data-lab="right">آزمایش: مثلث قائم</button>
-      <button class="lab-btn" data-lab="draw">رسم و ذخیره</button>
-      <button class="lab-btn" data-lab="game">چالش بازی</button>
-    </nav>
-
-    <main class="container">
-      <section id="labArea" class="lab-area" aria-live="polite"></section>
-
-      <aside class="panel">
-        <h2>راهنما</h2>
-        <div id="infoBox">یک آزمایش را انتخاب کنید.</div>
-        <div class="controls" id="controlsBox"></div>
-      </aside>
-    </main>
-
-    <footer class="footer">
-      <small>طراحی شده برای معلمان و دانش‌آموزان — نسخه بازی‌محور</small>
-    </footer>
-  </div>
-
-  <!-- مودال آموزشی -->
-  <div id="tutorialModal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <button class="close" id="closeTutorial">&times;</button>
-      <h2>آموزش سریع</h2>
-      <ol>
-        <li>با دکمه‌های بالای صفحه آزمایش را انتخاب کنید.</li>
-        <li>در بخش ساخت مثلث نقاط را لمس یا کلیک و درگ کنید.</li>
-        <li>در بخش شباهت مقیاس و زاویه را تغییر دهید تا رابطه را ببینید.</li>
-        <li>در بخش بازی، هدف را حدس بزنید و امتیاز بگیرید.</li>
-      </ol>
-      <div class="modal-actions">
-        <label><input type="checkbox" id="dontShow"> نمایش نده دوباره</label>
-        <button id="startLab" class="btn">شروع</button>
-      </div>
+<!-- آموزش اولیه -->
+<div id="tutorialModal" class="modal">
+    <div class="modal-content">
+        <h2>آموزش کار با آزمایشگاه</h2>
+        <p>در این آزمایشگاه می‌توانی نقطه‌های مثلث را روی صفحه بکشانی، اضلاع را تغییر دهی و بررسی کنی که آیا دو مثلث هم‌نهشت هستند یا خیر.</p>
+        <p>برای شروع روی دکمه زیر کلیک کن:</p>
+        <button id="startBtn">شروع</button>
     </div>
-  </div>
+</div>
 
-  <script src="app.js"></script>
+<header>
+    <h1>آزمایشگاه فانتزی هم‌نهشتی مثلث‌ها</h1>
+</header>
+
+<section id="lab">
+    <canvas id="triangleCanvas"></canvas>
+
+    <div class="panel">
+        <h3>تنظیمات مثلث‌ها</h3>
+
+        <label>مثلث اول:</label>
+        <button class="btn" onclick="randomTriangle(1)">مثلث تصادفی</button>
+
+        <label>مثلث دوم:</label>
+        <button class="btn" onclick="randomTriangle(2)">مثلث تصادفی</button>
+
+        <button id="checkBtn" class="check-btn">بررسی هم‌نهشتی</button>
+
+        <p id="result"></p>
+    </div>
+</section>
+
+<!-- صدا -->
+<audio id="magicSound" src="magic.mp3"></audio>
+
+<script src="app.js"></script>
 </body>
 </html>
