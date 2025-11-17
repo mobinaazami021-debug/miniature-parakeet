@@ -1,110 +1,109 @@
-const canvas = document.getElementById("triangleCanvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth * 0.9;
-canvas.height = window.innerHeight * 0.6;
+// ساده، بدون فریمورک — قابل توسعه
+document.addEventListener('DOMContentLoaded', () => {
+  const mSlider = document.getElementById('mSlider');
+  const bSlider = document.getElementById('bSlider');
+  const mVal = document.getElementById('mVal');
+  const bVal = document.getElementById('bVal');
+  const equation = document.getElementById('equation');
+  const plotDiv = document.getElementById('plot');
+  const randomBtn = document.getElementById('randomBtn');
+  const feedback = document.getElementById('feedback');
+  const exerciseText = document.getElementById('exerciseText');
+  const answerInput = document.getElementById('answerInput');
+  const submitAnswer = document.getElementById('submitAnswer');
+  const scoreSpan = document.getElementById('score');
+  const saveBtn = document.getElementById('saveBtn');
+  const loadBtn = document.getElementById('loadBtn');
 
-let triangles = {
-    1: [{x:70,y:200},{x:150,y:80},{x:250,y:220}],
-    2: [{x:320,y:200},{x:400,y:80},{x:500,y:220}],
-};
+  let score = 0;
+  let currentProblem = null;
 
-let dragPoint = null;
-let currentTriangle = null;
+  function updateEquation(){
+    const m = parseFloat(mSlider.value);
+    const b = parseFloat(bSlider.value);
+    mVal.textContent = m;
+    bVal.textContent = b;
+    equation.textContent = `y = ${m}x + ${b}`;
+    drawLine(m,b);
+  }
 
-function drawTriangles() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+  function drawLine(m,b){
+    // رسم خط با استفاده از Plotly
+    const xs = [];
+    const ys = [];
+    for(let x=-10;x<=10;x+=0.5){ xs.push(x); ys.push(m*x + b); }
+    const trace = { x: xs, y: ys, mode: 'lines', name: `y=${m}x+${b}` };
+    const layout = { margin:{t:10,b:30,l:40,r:10}, xaxis:{range:[-10,10]}, yaxis:{range:[-15,15]} };
+    Plotly.react(plotDiv, [trace], layout, {responsive:true});
+  }
 
-    for (let t=1; t<=2; t++) {
-        ctx.fillStyle = t === 1 ? "#ff77a9" : "#77a9ff";
-        ctx.strokeStyle = "#333";
-        ctx.lineWidth = 3;
+  // نمونهٔ سوالات ساده (بعدا از فایل JSON بارگذاری کنید)
+  const problems = [
+    {id:1, prompt: "خطی با شیب 2 و عرض از مبدأ 3 بنویسید.", answer: "y = 2x + 3"},
+    {id:2, prompt: "اگر خطی از نقاط (0, -1) و (2, 3) بگذرد، معادله را پیدا کنید.", answer: "y = 2x - 1"},
+    {id:3, prompt: "شیب خطی که بین (1,2) و (3,6) است چه مقدار است؟", answer: "2"},
+    {id:4, prompt: "معادله‌ای که عرض از مبدأ آن 4 و شیب -1 باشد بنویسید.", answer: "y = -1x + 4"}
+  ];
 
-        ctx.beginPath();
-        let p = triangles[t];
-        ctx.moveTo(p[0].x, p[0].y);
-        ctx.lineTo(p[1].x, p[1].y);
-        ctx.lineTo(p[2].x, p[2].y);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.globalAlpha = 0.3;
-        ctx.fill();
-        ctx.globalAlpha = 1;
+  function randomProblem(){
+    currentProblem = problems[Math.floor(Math.random()*problems.length)];
+    exerciseText.textContent = currentProblem.prompt;
+    feedback.textContent = '';
+    answerInput.value = '';
+  }
 
-        p.forEach(point => {
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, 10, 0, Math.PI*2);
-            ctx.fill();
-        });
+  function normalize(s){
+    return String(s).replace(/\s+/g,'').replace(/−/g,'-').toLowerCase();
+  }
+
+  function checkAnswer(){
+    if(!currentProblem){
+      feedback.textContent = "ابتدا یک سوال انتخاب کنید (سوال تصادفی).";
+      return;
     }
-}
-
-function randomTriangle(n) {
-    const s = canvas.width / 3;
-    const x = Math.random() * s + (n===1?20:canvas.width/2);
-    const y = Math.random() * (canvas.height-80) + 40;
-
-    triangles[n] = [
-        {x:x, y:y},
-        {x:x+80, y:y-50},
-        {x:x+120, y:y+70}
-    ];
-
-    document.getElementById("magicSound").play();
-    drawTriangles();
-}
-
-canvas.onmousedown = e => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-
-    for (let t=1; t<=2; t++) {
-        for (let p of triangles[t]) {
-            if (Math.hypot(mx-p.x, my-p.y) < 12) {
-                dragPoint = p;
-                currentTriangle = t;
-                return;
-            }
-        }
+    const user = normalize(answerInput.value);
+    const correct = normalize(currentProblem.answer);
+    if(!user){
+      feedback.textContent = "لطفاً جواب را وارد کنید.";
+      return;
     }
-};
+    if(user === correct){
+      feedback.textContent = "آفرین! جواب درست است ✅";
+      score += 10;
+    } else {
+      feedback.textContent = `نزدیک است — جواب درست: ${currentProblem.answer}`;
+      score = Math.max(0, score - 2);
+    }
+    scoreSpan.textContent = score;
+  }
 
-canvas.onmousemove = e => {
-    if (!dragPoint) return;
+  // ذخیره/بارگذاری ساده محلی
+  saveBtn.addEventListener('click', () => {
+    const data = {score, lastProblem: currentProblem ? currentProblem.id : null, timestamp: Date.now()};
+    localStorage.setItem('equationLab_v1', JSON.stringify(data));
+    feedback.textContent = 'ذخیره شد.';
+  });
 
-    const rect = canvas.getBoundingClientRect();
-    dragPoint.x = e.clientX - rect.left;
-    dragPoint.y = e.clientY - rect.top;
+  loadBtn.addEventListener('click', () => {
+    const raw = localStorage.getItem('equationLab_v1');
+    if(!raw){ feedback.textContent = 'چیزی برای بارگذاری پیدا نشد.'; return; }
+    const data = JSON.parse(raw);
+    score = data.score || 0;
+    scoreSpan.textContent = score;
+    if(data.lastProblem){
+      currentProblem = problems.find(p=>p.id===data.lastProblem) || null;
+      exerciseText.textContent = currentProblem ? currentProblem.prompt : 'سوال قبلی یافت نشد.';
+    }
+    feedback.textContent = 'بارگذاری انجام شد.';
+  });
 
-    drawTriangles();
-};
+  // رویدادها
+  mSlider.addEventListener('input', updateEquation);
+  bSlider.addEventListener('input', updateEquation);
+  randomBtn.addEventListener('click', randomProblem);
+  submitAnswer.addEventListener('click', checkAnswer);
+  answerInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') checkAnswer(); });
 
-canvas.onmouseup = () => dragPoint = null;
-
-function sideLengths(tri) {
-    const [A,B,C] = tri;
-    return [
-        Math.hypot(A.x-B.x, A.y-B.y),
-        Math.hypot(B.x-C.x, B.y-C.y),
-        Math.hypot(C.x-A.x, C.y-A.y)
-    ].sort((a,b)=>a-b);
-}
-
-function checkCongruency() {
-    let s1 = sideLengths(triangles[1]);
-    let s2 = sideLengths(triangles[2]);
-
-    let ok = Math.abs(s1[0]-s2[0])<2 &&
-             Math.abs(s1[1]-s2[1])<2 &&
-             Math.abs(s1[2]-s2[2])<2;
-
-    document.getElementById("result").innerText = 
-        ok ? "✔ مثلث‌ها هم‌نهشت هستند!" : "✘ هم‌نهشت نیستند.";
-}
-
-document.getElementById("checkBtn").onclick = checkCongruency;
-
-document.getElementById("startBtn").onclick = () => {
-    document.getElementById("tutorialModal").style.display = "none";
-    drawTriangles();
-};
+  // مقداردهی اولیه
+  updateEquation();
+});
