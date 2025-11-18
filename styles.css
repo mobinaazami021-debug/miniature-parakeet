@@ -1,59 +1,82 @@
-:root{
-  --bg1:#e0f2fe;
-  --bg2:#f0f9ff;
-  --card:#ffffff;
-  --muted:#6b7280;
-  --accent1:#60a5fa;
-  --accent2:#34d399;
-  --accent3:#f59e0b;
-  --text:#0b1220;
-  --glass: rgba(11,18,32,0.04);
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;500;700&display=swap');
+
+body {
+    margin: 0;
+    font-family: "Vazirmatn", sans-serif;
+    background: url('https://i.ibb.co/Yphc6c7/math-bg.png'), #f7f4ff;
+    background-size: 500px;
+    animation: scrollBg 25s linear infinite;
 }
 
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180deg,var(--bg1),var(--bg2)); color:var(--text); -webkit-font-smoothing:antialiased;}
-.site-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px}
-.school-name{font-weight:700;color:var(--accent2)}
-.presenter{font-size:0.9rem;color:var(--muted)}
-.header-right h1{margin:0;font-size:1.4rem}
-.subtitle{margin:4px 0 0;color:var(--muted)}
-
-.container{max-width:1150px;margin:12px auto;padding:12px;display:grid;grid-template-columns:1fr;gap:14px}
-.card{background:var(--card);border-radius:14px;padding:12px;box-shadow:0 10px 30px rgba(11,18,32,0.08);border:1px solid rgba(11,18,32,0.04)}
-.lab-scene .lab-canvas{display:flex;gap:12px;align-items:flex-start;position:relative;padding:12px}
-.board{flex:1;background:linear-gradient(180deg,#ffffff,#f8fafc);border-radius:10px;padding:8px;border:1px solid rgba(11,18,32,0.04);box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);}
-.board-plot{width:100%;height:300px;border-radius:8px;overflow:hidden}
-
-/* کاراکترها */
-.characters{width:160px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:flex-end}
-.char{width:110px;height:auto;display:block}
-.talk-bubble{position:absolute;right:200px;top:20px;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;padding:10px 14px;border-radius:12px;box-shadow:0 8px 20px rgba(11,18,32,0.12);font-weight:700;white-space:pre-line}
-
-/* کنترل‌ها */
-.controls label{display:block;margin-top:8px;color:var(--muted)}
-.controls input[type="range"]{width:100%;margin-top:6px}
-.controls input[type="text"], .exercise input{width:100%;padding:8px;border-radius:10px;border:1px solid rgba(11,18,32,0.06);margin-top:8px}
-.controls-row{display:flex;gap:8px;margin-top:10px}
-.btn{background:linear-gradient(90deg,var(--accent1),var(--accent2));border:none;padding:10px 12px;border-radius:10px;color:white;cursor:pointer;font-weight:700;box-shadow: 0 8px 18px rgba(11,18,32,0.08)}
-.btn-outline{background:transparent;border:1px solid rgba(11,18,32,0.06);padding:8px 12px;border-radius:10px;color:var(--text);cursor:pointer}
-
-/* تمرین و پیشرفت */
-.exercise-actions{display:flex;gap:8px;margin-top:10px}
-.feedback{margin-top:10px;color:var(--accent3);font-weight:700}
-.game-area{margin-top:12px;display:flex;gap:8px;align-items:center}
-.muted{color:var(--muted)}
-.progress-row{display:flex;gap:8px;margin-top:8px}
-.small{font-size:0.85rem;color:var(--muted)}
-
-/* responsive */
-@media(min-width:980px){
-  .container{grid-template-columns:340px 1fr 360px}
-  .lab-scene{grid-column:2 / 3}
-  .controls{grid-column:1 / 2}
-  .exercise{grid-column:2 / 3}
-  .progress{grid-column:3 / 4}
+@keyframes scrollBg {
+    from { background-position: 0 0; }
+    to { background-position: 500px 500px; }
 }
-@media(max-width:979px){
-  .talk-bubble{right:14px;top:260px}
-  .characters{flex-direction:row; width:100%; justify-content:space-around}
+
+.header {
+    background: linear-gradient(90deg, #ffb3d1, #b494ff);
+    padding: 18px;
+    text-align: center;
+    color: #fff;
+    border-bottom: 4px solid #8055ff;
+    box-shadow: 0 4px 8px #0002;
 }
+
+.container {
+    display: flex;
+    max-width: 1200px;
+    margin: 20px auto;
+    gap: 20px;
+}
+
+.panel {
+    width: 260px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px #0001;
+    border: 2px solid #d7caff;
+}
+
+.boards {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: 25px;
+}
+
+canvas {
+    background: repeating-linear-gradient(
+        0deg, #ffffff, #ffffff 9px, #dedaff 10px
+    ),
+    repeating-linear-gradient(
+        90deg, #ffffff, #ffffff 9px, #dedaff 10px
+    );
+    border: 3px solid #b49cff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px #0001;
+}
+
+.btn {
+    padding: 10px 16px;
+    margin-top: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+.purple { background: #b38bff; color: #fff; }
+.pink { background: #ff9acb; color: #fff; }
+.start { background: #68d46f; color: #fff; }
+.snap { background: #ffd151; }
+.check { background: #6fb7ff; }
+
+.actions {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.btn:hover { transform: scale(1.05); }
