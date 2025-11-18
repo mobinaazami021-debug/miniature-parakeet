@@ -1,148 +1,55 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>آزمایشگاه معادلهٔ خط — مدرسهٔ پردیس</title>
-
-  <link rel="stylesheet" href="css/styles.css">
-
-  <!-- Plotly برای رسم نمودار -->
-  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
-
-  <!-- MathJax برای نمایش معادلات زیبا -->
-  <script>
-    window.MathJax = { tex: {inlineMath: [['$','$'], ['\\(','\\)']]}, svg: {fontCache: 'global'} };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمایشگاه هم‌نهشتی — نسخه بازی</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-left">
-      <div class="school">
-        <div class="school-name">مدرسهٔ پردیس</div>
-        <div class="presenter">ارائه‌دهنده: مبینا اعظمی</div>
-      </div>
-    </div>
-    <div class="header-right">
-      <h1>آزمایشگاه معادلهٔ خط</h1>
-      <p class="subtitle">آموزش تعاملی و بازی‌محور برای مفاهیم $y=mx+b$ — مناسب پایهٔ نهم</p>
-    </div>
-  </header>
 
-  <main class="container">
-    <!-- صحنهٔ کارتونی آزمایشگاه -->
-    <section class="lab-scene card">
-      <div class="lab-canvas">
-        <!-- تخته سفید (نمودار نمایش داده می‌شود روی آن) -->
-        <div class="board">
-          <div id="plot" class="board-plot"></div>
-        </div>
+<header class="header">
+    <h1>🧪 آزمایشگاه بازی‌محور — هم‌نهشتی مثلث‌ها</h1>
+    <p>تمرین تعاملی + حالت بازی + اثبات خودکار</p>
+</header>
 
-        <!-- کاراکترها (SVG ساده) -->
-        <div class="characters">
-          <!-- پسر -->
-          <svg class="char boy" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-              <linearGradient id="gSkin" x1="0" x2="0"><stop offset="0" stop-color="#ffd7b2"/><stop offset="1" stop-color="#ffb07b"/></linearGradient>
-              <linearGradient id="gShirt" x1="0" x2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
-            </defs>
-            <rect x="20" y="60" width="80" height="70" rx="10" fill="url(#gShirt)"/>
-            <circle cx="60" cy="36" r="22" fill="url(#gSkin)"/>
-            <ellipse cx="60" cy="80" rx="26" ry="6" fill="#0b1220" opacity="0.06"/>
-            <!-- چشم و لب ساده -->
-            <circle cx="53" cy="33" r="2.5" fill="#0b1220"/><circle cx="67" cy="33" r="2.5" fill="#0b1220"/>
-            <path d="M52 44 Q60 50 68 44" stroke="#fff" stroke-width="1.5" fill="none"/>
-          </svg>
+<div class="container">
 
-          <!-- دختر -->
-          <svg class="char girl" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-              <linearGradient id="gSkin2" x1="0" x2="0"><stop offset="0" stop-color="#ffe6c9"/><stop offset="1" stop-color="#ffc69b"/></linearGradient>
-              <linearGradient id="gDress" x1="0" x2="1"><stop offset="0" stop-color="#6ee7b7"/><stop offset="1" stop-color="#34d399"/></linearGradient>
-            </defs>
-            <rect x="20" y="66" width="80" height="64" rx="12" fill="url(#gDress)"/>
-            <circle cx="60" cy="36" r="22" fill="url(#gSkin2)"/>
-            <circle cx="53" cy="33" r="2.5" fill="#0b1220"/><circle cx="67" cy="33" r="2.5" fill="#0b1220"/>
-            <path d="M50 46 Q60 54 70 46" stroke="#fff" stroke-width="1.5" fill="none"/>
-            <path d="M40 18 Q60 4 80 18" fill="#f59e0b" opacity="0.12"/>
-          </svg>
-        </div>
+    <aside class="panel">
+        <h2>راهنما و اثبات</h2>
+        <p><strong>فرض:</strong> <span id="farz">—</span></p>
+        <p><strong>حکم:</strong> <span id="hokm">—</span></p>
+        <p><strong>اثبات:</strong></p>
+        <div id="proofBox">—</div>
 
-        <!-- حباب نکته کاراکتر -->
-        <div class="talk-bubble" id="hintBubble">برای شروع \n شیب (m) و b را تغییر بده.</div>
-      </div>
-    </section>
+        <hr>
 
-    <!-- کنترل‌ها و توضیح -->
-    <aside class="controls card">
-      <h3>آزمایشگر خط</h3>
-      <p class="muted">اسلایدرها را حرکت دهید تا اثر شیب و عرض از مبدأ را ببینید.</p>
-
-      <label>شیب (m): <strong id="mVal">1</strong></label>
-      <input id="mSlider" type="range" min="-6" max="6" step="0.1" value="1">
-
-      <label>عرض از مبدأ (b): <strong id="bVal">0</strong></label>
-      <input id="bSlider" type="range" min="-12" max="12" step="0.5" value="0">
-
-      <div class="controls-row">
-        <button id="presetBtn" class="btn-outline">پیش‌تنظیم‌های جذاب</button>
-        <button id="randomBtn" class="btn">سوال تصادفی</button>
-      </div>
-
-      <hr>
-
-      <h4>بررسی نقطه</h4>
-      <div class="controls-row">
-        <input id="xPoint" placeholder="x" inputmode="numeric">
-        <input id="yPoint" placeholder="y" inputmode="numeric">
-        <button id="checkPt" class="btn">بررسی</button>
-      </div>
-      <div id="pointFeedback" class="muted"></div>
-
-      <hr>
-
-      <h4>تنظیمات نمایش</h4>
-      <label><input type="checkbox" id="showGrid" checked> نمایش شبکه</label>
-      <label><input type="checkbox" id="showPoints" checked> نمایش نقاط نمونه</label>
+        <h3>امتیاز: <span id="score">0</span></h3>
+        <button onclick="startChallenge()" class="btn start">🎮 شروع چالش</button>
     </aside>
 
-    <!-- تمرین‌ها و بازی -->
-    <section class="exercise card">
-      <h3>تمرین‌ها و بازی‌ها</h3>
-      <div id="exerciseText" class="muted">روی «سوال تصادفی» کلیک کنید تا سوالی از کتاب نمایش داده شود.</div>
+    <main class="boards">
 
-      <div class="exercise-actions">
-        <input id="answerInput" placeholder="مثلاً y = 2x + 3">
-        <button id="submitAnswer" class="btn">ارسال پاسخ</button>
-      </div>
+        <section>
+            <h2>مثلث اول</h2>
+            <canvas id="canvas1" width="350" height="350"></canvas>
+            <button onclick="randomTriangle(1)" class="btn purple">مثلث اول تصادفی</button>
+        </section>
 
-      <div id="feedback" class="feedback"></div>
+        <section>
+            <h2>مثلث دوم</h2>
+            <canvas id="canvas2" width="350" height="350"></canvas>
+            <button onclick="randomTriangle(2)" class="btn pink">مثلث دوم تصادفی</button>
+        </section>
 
-      <div class="game-area">
-        <button id="guessM" class="btn-outline">بازی: حدس شیب (m)</button>
-        <button id="guessB" class="btn-outline">بازی: حدس b</button>
-        <div id="gameMsg" class="muted"></div>
-      </div>
-    </section>
+    </main>
+</div>
 
-    <!-- پیشرفت و ابزار معلم -->
-    <section class="progress card">
-      <h3>پیشرفت</h3>
-      <div>امتیاز: <strong id="score">0</strong></div>
-      <div class="progress-row">
-        <button id="saveBtn" class="btn-outline">ذخیره محلی</button>
-        <button id="loadBtn" class="btn-outline">بارگذاری</button>
-        <button id="exportCSV" class="btn">خروجی CSV برای معلم</button>
-      </div>
-      <div class="muted small">داده‌ها در مرورگر ذخیره می‌شوند؛ برای ذخیرهٔ مرکزی بعدی می‌توانیم Firebase اضافه کنیم.</div>
-    </section>
-  </main>
+<div class="actions">
+    <button onclick="snapAll()" class="btn snap">Snap 🔧</button>
+    <button onclick="checkCongruent()" class="btn check">بررسی هم‌نهشتی</button>
+</div>
 
-  <footer class="site-footer">
-    <small>طراحی کارتونی آزمایشگاهی — مناسب کلاس ریاضی پایهٔ نهم</small>
-  </footer>
-
-  <script src="js/app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
