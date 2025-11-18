@@ -1,57 +1,109 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>آزمایشگاه هم‌نهشتی</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>آزمایشگاه هم‌نهشتی مثلث‌ها — مبینا اعظمی</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <header class="topbar">
+    <div class="left">
+      <div class="brand">آزمایشگاه هم‌نهشتی — بازی‌محور</div>
+      <div class="subtitle">ارائه‌دهنده: مبینا اعظمی — کلاس 9/2 — مدرسه پردیس</div>
+    </div>
+    <nav class="nav">
+      <button id="btnTutorial" class="btn ghost">آموزش</button>
+      <button id="btnModeBuild" class="btn">حالت ساخت</button>
+      <button id="btnModeGame" class="btn">حالت بازی</button>
+      <button id="btnReset" class="btn ghost">پاک‌سازی</button>
+    </nav>
+  </header>
 
-<header class="header">
-    <h1>🧪 آزمایشگاه هم‌نهشتی — نسخه بازی</h1>
-    <p>تشخیص هم‌نهشتی + صفحه شطرنجی + حالت بازی</p>
-</header>
+  <main class="container">
+    <section class="leftCol">
+      <div class="boardCard">
+        <div class="boardHeader">
+          <h2>بوم‌ها (شطرنجی)</h2>
+          <div class="small">کلیک کن تا نقطه اضافه کنی — بعد از ۳ نقطه، مثلث رسم می‌شود. نقاط را بکش.</div>
+        </div>
 
-<div class="container">
+        <div class="canvases">
+          <div class="canvasWrap">
+            <div class="canvasTitle">مثلث ۱</div>
+            <canvas id="canvasA" class="canvas" width="420" height="420" aria-label="مثلث اول"></canvas>
+            <div class="canvasBtns">
+              <button class="btn" id="randA">تصادفی ۱</button>
+            </div>
+          </div>
 
-    <aside class="panel">
-        <h2>راهنما و اثبات</h2>
+          <div class="canvasWrap">
+            <div class="canvasTitle">مثلث ۲</div>
+            <canvas id="canvasB" class="canvas" width="420" height="420" aria-label="مثلث دوم"></canvas>
+            <div class="canvasBtns">
+              <button class="btn" id="randB">تصادفی ۲</button>
+            </div>
+          </div>
+        </div>
 
-        <p><strong>فرض:</strong> <span id="farz">—</span></p>
-        <p><strong>حکم:</strong> <span id="hokm">—</span></p>
+        <div class="controlsRow">
+          <button id="snapBtn" class="btn ghost">چسباندن (Snap)</button>
+          <button id="checkBtn" class="btn primary">بررسی هم‌نهشتی</button>
+          <button id="newChallenge" class="btn primary">چالش جدید</button>
+          <label class="small inline">دقت: 
+            <select id="sensitivity">
+              <option value="low">کم (آسان)</option>
+              <option value="med" selected>متوسط</option>
+              <option value="high">زیاد (دقیق)</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </section>
 
-        <p><strong>اثبات:</strong></p>
-        <div id="proofBox">—</div>
+    <aside class="rightCol">
+      <div class="panel">
+        <h3>نتیجهٔ بررسی</h3>
+        <div class="stat">روش تشخیص: <span id="method">—</span></div>
+        <div class="kv"><strong>فرض:</strong> <div id="farz">—</div></div>
+        <div class="kv"><strong>حکم:</strong> <div id="hokm">—</div></div>
+        <div class="kv"><strong>اثبات (خلاصه):</strong> <div id="proofText">—</div></div>
 
         <hr>
-        <h3>امتیاز: <span id="score">0</span></h3>
 
-        <button onclick="startChallenge()" class="btn start">🎮 شروع چالش</button>
+        <h4>بخش بازی</h4>
+        <div class="gameInfo">
+          <div>سطح: <span id="level">0</span></div>
+          <div>امتیاز: <span id="score">0</span></div>
+          <div id="gameHint" class="small">برای شروع روی «چالش جدید» بزن.</div>
+        </div>
+
+        <div style="margin-top:10px">
+          <button id="btnHint" class="btn ghost">راهنما</button>
+          <button id="btnMute" class="btn ghost">بی‌صدا</button>
+        </div>
+      </div>
     </aside>
+  </main>
 
-    <main class="boards">
+  <!-- tutorial modal -->
+  <div id="tutorialModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modalCard">
+      <button id="closeTutorial" class="close">&times;</button>
+      <h3>آموزش سریع</h3>
+      <ol>
+        <li>در حالت «ساخت» با کلیک ۳ نقطه اضافه کن تا مثلث رسم شود. نقاط را بکش تا اضلاع و زوایا تغییر کند.</li>
+        <li>در حالت «بازی» دکمهٔ «چالش جدید» را بزن؛ سیستم بیشتر مواقع دو مثلث هم‌نهشت تولید می‌کند — وظیفهٔ تو برقرار کردن هدفِ مرحله است.</li>
+        <li>روی «بررسی هم‌نهشتی» بزن تا سیستم روش را تشخیص دهد و فرض/حکم/اثبات را نشان دهد.</li>
+      </ol>
+      <div style="text-align:left;margin-top:8px"><label><input id="dontShow" type="checkbox"> نمایش نده دوباره</label> <button id="startNow" class="btn primary">شروع</button></div>
+    </div>
+  </div>
 
-        <section>
-            <h2>مثلث اول</h2>
-            <canvas id="canvas1" width="350" height="350"></canvas>
-            <button onclick="randomTriangle(1)" class="btn purple">مثلث اول تصادفی</button>
-        </section>
+  <footer class="footer">
+    ساخته شده برای تمرین در کلاس — Mobile-friendly — طراحی کارتونی
+  </footer>
 
-        <section>
-            <h2>مثلث دوم</h2>
-            <canvas id="canvas2" width="350" height="350"></canvas>
-            <button onclick="randomTriangle(2)" class="btn pink">مثلث دوم تصادفی</button>
-        </section>
-
-    </main>
-</div>
-
-<div class="actions">
-    <button onclick="snapAll()" class="btn snap">Snap 🔧</button>
-    <button onclick="checkCongruent()" class="btn check">بررسی هم‌نهشتی</button>
-</div>
-
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
