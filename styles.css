@@ -1,55 +1,32 @@
-body {
-    font-family: "Vazirmatn", sans-serif;
-    background: #eef2f3;
-    direction: rtl;
-    text-align: center;
-    margin: 0;
-    padding: 0;
+:root{
+  --bg:#f6f8ff; --card:#fff; --accent:#ffb347; --accent2:#60a5fa; --muted:#6b7280;
+  font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
 }
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#f3f6ff,#eef2f8);color:#0b1720;direction:rtl}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:linear-gradient(90deg,#fff,#f7fbff);box-shadow:0 6px 24px rgba(10,20,40,0.06)}
+.brand .title{font-weight:800;font-size:18px}
+.brand .subtitle{font-size:13px;color:var(--muted)}
+.sticker{width:56px;height:56px;border-radius:10px;border:2px solid rgba(0,0,0,0.06)}
 
-#menu {
-    background: #fff;
-    padding: 20px;
-    box-shadow: 0 0 10px #999;
-}
-
-button {
-    background: #ffcb66;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 12px;
-    cursor: pointer;
-    margin: 6px;
-    font-size: 16px;
-    transition: 0.2s;
-}
-
-button:hover {
-    background: #ffb843;
-}
-
-.section {
-    display: none;
-    padding: 20px;
-}
-
-canvas {
-    background-image: linear-gradient(90deg, #ccc 1px, transparent 1px),
-                      linear-gradient(#ccc 1px, transparent 1px);
-    background-size: 20px 20px;
-    background-color: #ffffff;
-    border: 2px solid #444;
-    border-radius: 10px;
-    margin: 10px;
-}
-
-.board-row {
-    display: flex;
-    justify-content: center;
-}
-
-#resultBox {
-    margin-top: 15px;
-    padding: 12px;
-    font-size: 18px;
-}
+.mainnav{display:flex;gap:8px;padding:12px 22px;align-items:center;flex-wrap:wrap;background:transparent}
+.btn{padding:8px 12px;border-radius:12px;border:none;background:#fff;box-shadow:0 8px 20px rgba(2,6,23,0.04);cursor:pointer;font-weight:700}
+.btn.primary{background:linear-gradient(180deg,var(--accent),var(--accent2));color:#041328}
+.btn.ghost{background:transparent;border:2px solid rgba(0,0,0,0.06)}
+.container{display:flex;gap:18px;max-width:1200px;margin:18px auto;padding:8px}
+.left{flex:1}
+.right{width:360px}
+.card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 16px 40px rgba(2,6,23,0.06);margin-bottom:14px}
+.hidden{display:none}
+.canvas{width:100%;height:auto;border-radius:10px}
+.smallCanvas{border-radius:10px;background:#fff}
+.twoCanvases{display:flex;gap:12px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.canWrap{text-align:center}
+.canTitle{font-weight:800;margin-bottom:8px}
+.metrics{font-size:13px;color:var(--muted);margin-top:6px}
+.controls{margin-top:10px;display:flex;gap:8px;justify-content:center}
+.guessRow{margin-top:10px;display:flex;gap:8px;justify-content:center}
+.resultCard{margin-top:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg,#fff8f0,#fffdfb);text-align:right}
+.info.small{margin-top:8px;color:var(--muted)}
+.footer{text-align:center;padding:12px;color:var(--muted);margin:20px 0}
+@media (max-width:980px){ .container{flex-direction:column;padding:12px} .right{width:100%} .twoCanvases{flex-direction:column} }
