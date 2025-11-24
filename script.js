@@ -1,139 +1,90 @@
-const canvas = document.getElementById("cnv");
-const ctx = canvas.getContext("2d");
-const clickSound = document.getElementById("clickSound");
-
-let mode = "move";
-
-let A = {x: 150, y: 150};
-let B = {x: 200, y: 80};
-let C = {x: 250, y: 150};
-
-let A2 = {x: 300, y: 250};
-let B2 = {x: 350, y: 180};
-let C2 = {x: 400, y: 250};
-
-function setMode(m){
-    mode = m;
-    clickSound.play();
+// نمایش بخش‌ها
+function showSection(sec) {
+    document.querySelectorAll(".section").forEach(s => s.style.display = "none");
+    document.getElementById(sec).style.display = "block";
 }
 
-function drawTriangle(p1, p2, p3, color){
+// محاسبه طول
+function dist(a, b) {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+// تولید زاویه از سه نقطه
+function angle(A, B, C) {
+    const AB = dist(A, B);
+    const BC = dist(B, C);
+    const AC = dist(A, C);
+    return Math.round(Math.acos((AB**2 + BC**2 - AC**2) / (2 * AB * BC)) * 180 / Math.PI);
+}
+
+// رسم مثلث
+function drawTriangle(ctx, p) {
+    ctx.clearRect(0, 0, 400, 400);
+
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(p1.x,p1.y);
-    ctx.lineTo(p2.x,p2.y);
-    ctx.lineTo(p3.x,p3.y);
+    ctx.moveTo(p[0].x, p[0].y);
+    ctx.lineTo(p[1].x, p[1].y);
+    ctx.lineTo(p[2].x, p[2].y);
     ctx.closePath();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3;
     ctx.stroke();
+
+    let a = dist(p[1], p[2]);
+    let b = dist(p[0], p[2]);
+    let c = dist(p[0], p[1]);
+
+    ctx.fillStyle = "blue";
+    ctx.fillText("a=" + Math.round(a), (p[1].x + p[2].x)/2, (p[1].y + p[2].y)/2);
+    ctx.fillText("b=" + Math.round(b), (p[0].x + p[2].x)/2, (p[0].y + p[2].y)/2);
+    ctx.fillText("c=" + Math.round(c), (p[0].x + p[1].x)/2, (p[0].y + p[1].y)/2);
+
+    ctx.fillText("∠A=" + angle(p[1], p[0], p[2]), p[0].x+5, p[0].y+5);
+    ctx.fillText("∠B=" + angle(p[0], p[1], p[2]), p[1].x+5, p[1].y+5);
+    ctx.fillText("∠C=" + angle(p[0], p[2], p[1]), p[2].x+5, p[2].y+5);
 }
 
-function render(){
-    ctx.clearRect(0,0,500,400);
-
-    drawTriangle(A,B,C,"#ff2f2f");  
-    drawTriangle(A2,B2,C2,"#325dff"); 
+// تولید مثلث تصادفی
+function randomTriangle() {
+    return [
+        {x: Math.random()*250+20, y: Math.random()*250+20},
+        {x: Math.random()*250+20, y: Math.random()*250+20},
+        {x: Math.random()*250+20, y: Math.random()*250+20}
+    ];
 }
 
-render();
 
-// -----------------------
-//  انتخاب با ماوس
-// -----------------------
-function inside(px,py,A,B,C){
-    let area = Math.abs((A.x*(B.y-C.y)+B.x*(C.y-A.y)+C.x*(A.y-B.y))/2);
-    let area1 = Math.abs((px*(B.y-C.y)+B.x*(C.y-py)+C.x*(py-B.y))/2);
-    let area2 = Math.abs((A.x*(py-C.y)+px*(C.y-A.y)+C.x*(A.y-py))/2);
-    let area3 = Math.abs((A.x*(B.y-py)+B.x*(py-A.y)+px*(A.y-B.y))/2);
+// ------------------ حالت بازی ------------------
 
-    return Math.abs(area - (area1+area2+area3)) < 0.1;
-}
+let tri1, tri2, areCongruent;
 
-// -----------------------
-//   حرکت با ماوس
-// -----------------------
-let dragging = false;
-let offsetX = 0;
-let offsetY = 0;
+function newPair() {
+    tri1 = randomTriangle();
 
-canvas.addEventListener("mousedown", e=>{
-    let r = canvas.getBoundingClientRect();
-    let mx = e.clientX - r.left;
-    let my = e.clientY - r.top;
-
-    if(inside(mx,my,A2,B2,C2)){
-        dragging = true;
-        offsetX = mx;
-        offsetY = my;
-        clickSound.play();
-    }
-});
-
-canvas.addEventListener("mouseup", ()=> dragging=false);
-
-canvas.addEventListener("mousemove", e=>{
-    if(!dragging) return;
-
-    let r = canvas.getBoundingClientRect();
-    let mx = e.clientX - r.left;
-    let my = e.clientY - r.top;
-
-    let dx = mx - offsetX;
-    let dy = my - offsetY;
-
-    if(mode==="move"){
-        A2.x+=dx; B2.x+=dx; C2.x+=dx;
-        A2.y+=dy; B2.y+=dy; C2.y+=dy;
+    if (Math.random() < 0.8) {
+        let dx = Math.random()*40+20;
+        let dy = Math.random()*40+20;
+        tri2 = tri1.map(p => ({x: p.x + dx, y: p.y + dy}));
+        areCongruent = true;
+    } else {
+        tri2 = randomTriangle();
+        areCongruent = false;
     }
 
-    if(mode==="rotate"){
-        rotateTriangle(0.07);
-    }
+    drawTriangle(document.getElementById("triangle1").getContext("2d"), tri1);
+    drawTriangle(document.getElementById("triangle2").getContext("2d"), tri2);
 
-    if(mode==="reflect"){
-        reflectTriangle();
-    }
-
-    if(mode==="scale"){
-        scaleTriangle(1.02);
-    }
-
-    offsetX = mx;
-    offsetY = my;
-
-    render();
-});
-
-// -----------------------
-//   هندسه
-// -----------------------
-function rotatePoint(p,c,angle){
-    let s = Math.sin(angle);
-    let co = Math.cos(angle);
-
-    let nx = co*(p.x-c.x) - s*(p.y-c.y) + c.x;
-    let ny = s*(p.x-c.x) + co*(p.y-c.y) + c.y;
-    return {x:nx,y:ny};
+    document.getElementById("resultBox").innerHTML = "";
 }
 
-function rotateTriangle(angle){
-    let center = A2; 
-    B2 = rotatePoint(B2,center,angle);
-    C2 = rotatePoint(C2,center,angle);
-}
 
-function reflectTriangle(){
-    B2.y = 400 - B2.y;
-    C2.y = 400 - C2.y;
-    A2.y = 400 - A2.y;
-}
+// بررسی هم‌نهشتی
+function checkAnswer(answer) {
+    let box = document.getElementById("resultBox");
 
-function scaleTriangle(f){
-    let cx = A2.x;
-    let cy = A2.y;
-
-    B2.x = cx + (B2.x - cx)*f;
-    B2.y = cy + (B2.y - cy)*f;
-    C2.x = cx + (C2.x - cx)*f;
-    C2.y = cy + (C2.y - cy)*f;
+    if (answer === areCongruent) {
+        box.innerHTML = "<b style='color:green'>✔ درست گفتی!</b><br>فرض: اضلاع و زاویه‌ها برابرند<br>حکم: مثلث‌ها هم‌نهشت‌اند<br>اثبات: با یکی از حالت‌های هم‌نهشتی ض‌.ض‌.ض ، ض‌.ز‌.ض ، ز‌.ض‌.ز ، و‌.ض ، و‌.ز نتیجه می‌شود.";
+    } else {
+        box.innerHTML = "<b style='color:red'>✘ اشتباه شد</b><br>اندازه ضلع‌ها و زاویه‌ها با هم برابر نیستند پس هم‌نهشت نیستند.";
+    }
 }
