@@ -1,13 +1,13 @@
-// DOM ready
-document.addEventListener('DOMContentLoaded', ()=> {
-  // Config
+// script.js — نسخه با اندازه اضلاع/زاویه، حدس هم‌نهشتی، فرض/حکم/اثبات
+document.addEventListener('DOMContentLoaded', () => {
+
   const PROB_CONGRUENT = 0.8;
   const TOL = { low: 10, med: 6, high: 3 };
   const ANG = { low: 6.5, med: 4.5, high: 2.0 };
   let sensitivity = 'med';
   let muted = false;
 
-  // Elements
+  // elements
   const canvasA = document.getElementById('canvasA');
   const canvasB = document.getElementById('canvasB');
   const randA = document.getElementById('randA');
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
   const challengeBtn = document.getElementById('challengeBtn');
   const btnRandA = document.getElementById('btnRandA');
   const btnRandB = document.getElementById('btnRandB');
-  const btnReset = document.getElementById('btnReset');
+  const btnPresent = document.getElementById('btnPresent');
   const btnTutorial = document.getElementById('btnTutorial');
   const btnHelp = document.getElementById('btnHelp');
   const btnModeBuild = document.getElementById('btnModeBuild');
@@ -37,12 +37,40 @@ document.addEventListener('DOMContentLoaded', ()=> {
   const startNow = document.getElementById('startNow');
   const dontShow = document.getElementById('dontShow');
   const btnMute = document.getElementById('btnMute');
+  const btnGuessYes = document.getElementById('btnGuessYes');
+  const btnGuessNo = document.getElementById('btnGuessNo');
+  const metricsA = document.getElementById('metricsA');
+  const metricsB = document.getElementById('metricsB');
 
-  // Boards (wrapper object with drag support)
-  function CanvasBoard(el){
-    const c = el;
+  // audio (WebAudio short tones)
+  const audioCtx = (typeof AudioContext !== 'undefined') ? new AudioContext() : null;
+  function tone(freq=880, time=0.06, gain=0.002){
+    if(!audioCtx || muted) return;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = freq; g.gain.value = gain;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + time);
+    o.stop(audioCtx.currentTime + time);
+  }
+
+  // geometry helpers
+  function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+  function angle(A,B,C){
+    const AB = dist(A,B), CB = dist(C,B), AC = dist(A,C);
+    if(AB === 0 || CB === 0) return 0;
+    const cosv = (AB*AB + CB*CB - AC*AC)/(2*AB*CB);
+    return Math.acos(Math.max(-1, Math.min(1, cosv)))*180/Math.PI;
+  }
+  function isRight(tri){
+    const angs = [ angle(tri[1],tri[0],tri[2]), angle(tri[0],tri[1],tri[2]), angle(tri[0],tri[2],tri[1]) ];
+    return angs.some(a => Math.abs(a - 90) < 3.5);
+  }
+
+  // CanvasBoard
+  function CanvasBoard(canvas){
+    const c = canvas;
     const ctx = c.getContext('2d');
-    let pts = [], drag = null;
+    let pts = [], dragging = null;
 
     function toLocal(e){
       const r = c.getBoundingClientRect();
@@ -53,16 +81,14 @@ document.addEventListener('DOMContentLoaded', ()=> {
 
     function redraw(){
       ctx.clearRect(0,0,c.width,c.height);
-      // draw triangle
-      if(pts.length===3){
+      if(pts.length === 3){
         ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y); ctx.lineTo(pts[1].x,pts[1].y); ctx.lineTo(pts[2].x,pts[2].y); ctx.closePath();
-        ctx.fillStyle='rgba(96,165,250,0.12)'; ctx.fill();
-        ctx.strokeStyle='#213547'; ctx.lineWidth=2; ctx.stroke();
+        ctx.fillStyle = 'rgba(99,102,241,0.08)'; ctx.fill();
+        ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2; ctx.stroke();
       }
-      // draw handles
       for(let i=0;i<pts.length;i++){
-        const p=pts[i];
-        ctx.beginPath(); ctx.fillStyle='#ffb347'; ctx.arc(p.x,p.y,9,0,Math.PI*2); ctx.fill();
+        const p = pts[i];
+        ctx.beginPath(); ctx.fillStyle = '#ffb347'; ctx.arc(p.x,p.y,8,0,Math.PI*2); ctx.fill();
         ctx.strokeStyle='#b84a6a'; ctx.lineWidth=1.2; ctx.stroke();
         ctx.fillStyle='#021428'; ctx.font='12px Vazirmatn, system-ui'; ctx.fillText(['A','B','C'][i], p.x-6, p.y+5);
       }
@@ -70,150 +96,177 @@ document.addEventListener('DOMContentLoaded', ()=> {
 
     c.addEventListener('pointerdown', e=>{
       const pos = toLocal(e);
-      if(pts.length < 3){ pts.push(pos); playClick(); redraw(); return; }
+      if(pts.length < 3){
+        pts.push(pos); tone(880,0.04,0.002); redraw(); updateAllMetrics(); return;
+      }
       let nearest=-1, md=9999;
-      pts.forEach((p,i)=>{ const d = Math.hypot(p.x-pos.x,p.y-pos.y); if(d<md && d<20){ md=d; nearest=i; }});
-      if(nearest>=0){ drag = nearest; try{ c.setPointerCapture(e.pointerId); }catch(_){}; playClick(); }
+      pts.forEach((p,i)=>{ const d=dist(p,pos); if(d<md && d<20){ md=d; nearest=i; }});
+      if(nearest>=0){ dragging = nearest; try{ c.setPointerCapture(e.pointerId); }catch(_){ } tone(1200,0.03,0.0015); }
     });
 
     c.addEventListener('pointermove', e=>{
-      if(drag === null) return;
+      if(dragging === null) return;
       const pos = toLocal(e);
       pos.x = Math.max(8, Math.min(c.clientWidth-8, pos.x));
       pos.y = Math.max(8, Math.min(c.clientHeight-8, pos.y));
-      pts[drag].x = pos.x; pts[drag].y = pos.y; redraw();
+      pts[dragging].x = pos.x; pts[dragging].y = pos.y; redraw(); updateAllMetrics();
     });
 
     c.addEventListener('pointerup', e=>{
-      if(drag !== null){ try{ c.releasePointerCapture(e.pointerId); }catch(_){}; drag=null; playSuccess(); }
+      if(dragging !== null){ try{ c.releasePointerCapture(e.pointerId); }catch(_){ } dragging = null; tone(660,0.05,0.002); updateAllMetrics(); }
     });
 
-    function clear(){ pts=[]; redraw(); }
-    function setPoints(arr){ pts = arr.map(p=>({x:p.x,y:p.y})); redraw(); }
+    function clear(){ pts=[]; redraw(); updateAllMetrics(); }
+    function setPoints(arr){ pts = arr.map(p=>({x:p.x,y:p.y})); redraw(); updateAllMetrics(); }
     function getPoints(){ return pts.slice(); }
     function ensureRandom(baseX){
-      if(pts.length>=3) return;
+      if(pts.length >= 3) return;
       const x = baseX + Math.random()*80;
       const y = 60 + Math.random()*160;
       setPoints([{x:x,y:y},{x:x+80+Math.random()*30,y:y-40},{x:x+120+Math.random()*20,y:y+60}]);
     }
-    redraw();
     return { clear, setPoints, getPoints, ensureRandom, redraw };
   }
 
   const A = CanvasBoard(canvasA);
   const B = CanvasBoard(canvasB);
 
-  // sound (WebAudio)
-  const audioCtx = (typeof AudioContext !== 'undefined') ? new AudioContext() : null;
-  function playClick(){ if(!audioCtx || muted) return; const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type='sine'; o.frequency.value=900; g.gain.value=0.002; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime+0.03); o.stop(audioCtx.currentTime+0.03); }
-  function playSuccess(){ if(!audioCtx || muted) return; const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type='sine'; o.frequency.value=1200; g.gain.value=0.003; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime+0.06); o.stop(audioCtx.currentTime+0.06); }
-
-  // helpers geometry
-  function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
-  function angle(A,B,C){ const AB=dist(A,B), CB=dist(C,B), AC=dist(A,C); const cosv=(AB*AB+CB*CB-AC*AC)/(2*AB*CB); return Math.acos(Math.max(-1,Math.min(1,cosv)))*180/Math.PI; }
-  function isRight(tri){ const angs=[ angle(tri[1],tri[0],tri[2]), angle(tri[0],tri[1],tri[2]), angle(tri[0],tri[2],tri[1]) ]; return angs.some(a=>Math.abs(a-90)<3.0); }
-
-  // set up listeners (buttons)
-  btnRandA.addEventListener('click', ()=> { A.ensureRandom(40); if(currentMode==='game') maybeMakeBCongruent(); });
-  btnRandB.addEventListener('click', ()=> B.ensureRandom(160));
+  // UI bindings
+  btnRandA.addEventListener('click', ()=> { A.ensureRandom(40); if(currentMode === 'game') maybeMakeBCongruent(); });
+  btnRandB.addEventListener('click', ()=> { B.ensureRandom(160); });
   randA.addEventListener('click', ()=> A.ensureRandom(40));
   randB.addEventListener('click', ()=> B.ensureRandom(160));
   clearA.addEventListener('click', ()=> A.clear());
   clearB.addEventListener('click', ()=> B.clear());
-  snapBtn.addEventListener('click', snapAlign);
+  snapBtn.addEventListener('click', snapAll);
   checkBtn.addEventListener('click', checkAndShow);
   challengeBtn.addEventListener('click', startChallenge);
-  btnReset.addEventListener('click', ()=>{ A.clear(); B.clear(); clearResult(); });
-  btnTutorial.addEventListener('click', ()=> { tutorialModal.classList.remove('hidden'); });
+  btnPresent.addEventListener('click', presentExample);
+  btnTutorial.addEventListener('click', ()=> tutorialModal.classList.remove('hidden'));
   closeTutorial && closeTutorial.addEventListener('click', ()=> tutorialModal.classList.add('hidden'));
   startNow && startNow.addEventListener('click', ()=> { tutorialModal.classList.add('hidden'); if(dontShow && dontShow.checked) localStorage.setItem('noTutor','1'); });
-  btnHelp.addEventListener('click', ()=> alert('راهنما:\n- در حالت ساخت ۳ کلیک بزن تا مثلث رسم شود. \n- در حالت بازی چالش ایجاد کن و سپس بررسی کن.'));
+  btnHelp.addEventListener('click', ()=> alert('راهنما: توضیحات آموزشی در دکمهٔ آموزش موجود است.'));
   btnModeBuild.addEventListener('click', ()=> setMode('build'));
   btnModeGame.addEventListener('click', ()=> setMode('game'));
   sensitivitySel.addEventListener('change', (e)=> sensitivity = e.target.value);
   btnMute && btnMute.addEventListener('click', ()=> { muted = !muted; btnMute.innerText = muted ? '🔇' : '🔈 بی‌صدا'; });
 
-  // mode
+  btnGuessYes.addEventListener('click', ()=> makeGuess(true));
+  btnGuessNo.addEventListener('click', ()=> makeGuess(false));
+
+  // initial data + UI
+  A.setPoints([{x:60,y:220},{x:150,y:80},{x:260,y:240}]);
+  B.setPoints([{x:320,y:200},{x:400,y:90},{x:420,y:240}]);
+  scoreEl.innerText = 0; levelEl.innerText = 0;
+
   let currentMode = 'build';
   function setMode(m){
     currentMode = m;
-    if(m==='build'){ gameHint.innerText='حالت ساخت فعال شد — کلیک کن و مثلث بساز.'; btnModeBuild.classList.add('primary'); btnModeGame.classList.remove('primary'); }
-    else { gameHint.innerText='حالت بازی فعال شد — چالش بزن.'; btnModeGame.classList.add('primary'); btnModeBuild.classList.remove('primary'); }
+    if(m === 'build'){ gameHint.innerText = 'حالت ساخت فعال شد — کلیک کن و مثلث بساز.'; btnModeBuild.classList.add('primary'); btnModeGame.classList.remove('primary'); }
+    else { gameHint.innerText = 'حالت بازی فعال شد — چالش بزن.'; btnModeGame.classList.add('primary'); btnModeBuild.classList.remove('primary'); }
   }
   setMode('build');
 
-  // detection
+  // detection methods (same as خواسته تو: ض.ض.ض، ض.ز.ض، ز.ض.ز، و.ض، و.ز)
   function approx(a,b,eps){ return Math.abs(a-b) <= eps; }
   function detectMethod(tA,tB){
-    const sA=[ dist(tA[0],tA[1]), dist(tA[1],tA[2]), dist(tA[2],tA[0]) ].sort((a,b)=>a-b);
-    const sB=[ dist(tB[0],tB[1]), dist(tB[1],tB[2]), dist(tB[2],tB[0]) ].sort((a,b)=>a-b);
-    const angA=[ angle(tA[1],tA[0],tA[2]), angle(tA[0],tA[1],tA[2]), angle(tA[0],tA[2],tA[1]) ];
-    const angB=[ angle(tB[1],tB[0],tB[2]), angle(tB[0],tB[1],tB[2]), angle(tB[0],tB[2],tB[1]) ];
-    const angAs=angA.slice().sort((a,b)=>a-b), angBs=angB.slice().sort((a,b)=>a-b);
+    const sA = [ dist(tA[0],tA[1]), dist(tA[1],tA[2]), dist(tA[2],tA[0]) ].sort((a,b)=>a-b);
+    const sB = [ dist(tB[0],tB[1]), dist(tB[1],tB[2]), dist(tB[2],tB[0]) ].sort((a,b)=>a-b);
+    const angA = [ angle(tA[1],tA[0],tA[2]), angle(tA[0],tA[1],tA[2]), angle(tA[0],tA[2],tA[1]) ];
+    const angB = [ angle(tB[1],tB[0],tB[2]), angle(tB[0],tB[1],tB[2]), angle(tB[0],tB[2],tB[1]) ];
+    const angAs = angA.slice().sort((a,b)=>a-b), angBs = angB.slice().sort((a,b)=>a-b);
+
     const tolS = TOL[sensitivity], tolAng = ANG[sensitivity];
 
     if( approx(sA[0],sB[0],tolS) && approx(sA[1],sB[1],tolS) && approx(sA[2],sB[2],tolS) ){
-      return { method:'ض.ض.ض', farz:'سه ضلع مثلث اول برابر سه ضلع مثلث دوم است.', hokm:'دو مثلث هم‌نهشت‌اند.', proof:'طبق ض.ض.ض ⇒ هم‌نهشتی.' };
+      return { method:'ض.ض.ض', farz:'سه ضلع متناظر برابرند.', hokm:'دو مثلث هم‌نهشت‌اند.', proofSteps:sssProof() };
     }
     if( approx(sA[0],sB[0],tolS) && approx(sA[2],sB[2],tolS) && approx(angAs[1],angBs[1],tolAng) ){
-      return { method:'ض.ز.ض', farz:'دو ضلع و زاویه بین آنها برابر است.', hokm:'دو مثلث هم‌نهشت‌اند.', proof:'طبق ض.ز.ض ⇒ هم‌نهشتی.' };
+      return { method:'ض.ز.ض', farz:'دو ضلع و زاویهٔ بین آن‌ها برابرند.', hokm:'دو مثلث هم‌نهشت‌اند.', proofSteps:sasProof() };
     }
     if( approx(angAs[0],angBs[0],tolAng) && approx(angAs[2],angBs[2],tolAng) && approx(sA[1],sB[1],tolS) ){
-      return { method:'ز.ض.ز', farz:'دو زاویه و ضلع بین آنها برابر است.', hokm:'دو مثلث هم‌نهشت‌اند.', proof:'طبق ز.ض.ز ⇒ هم‌نهشتی.' };
+      return { method:'ز.ض.ز', farz:'دو زاویه و ضلع بین آن‌ها برابرند.', hokm:'دو مثلث هم‌نهشت‌اند.', proofSteps:asaProof() };
     }
     if( isRight(tA) && isRight(tB) && approx(sA[1],sB[1],tolS) ){
-      return { method:'و.ض', farz:'وتر و یک ضلع قائمه برابر است.', hokm:'دو مثلث قائمه هم‌نهشت‌اند.', proof:'طبق و.ض ⇒ هم‌نهشتی.' };
+      return { method:'و.ض', farz:'وتر و یک ضلع قائمه برابرند.', hokm:'دو مثلث قائمه هم‌نهشت‌اند.', proofSteps:rhsProof() };
     }
     if( isRight(tA) && isRight(tB) && approx(angAs[1],angBs[1],tolAng) ){
-      return { method:'و.ز', farz:'وتر و یک زاویه برابر است.', hokm:'دو مثلث قائمه هم‌نهشت‌اند.', proof:'طبق و.ز ⇒ هم‌نهشتی.' };
+      return { method:'و.ز', farz:'وتر و یک زاویه برابرند.', hokm:'دو مثلث قائمه هم‌نهشت‌اند.', proofSteps:rAngleProof() };
     }
     return null;
   }
 
+  // proof templates
+  function sssProof(){ return ['فرض: سه ضلع متناظر برابرند.','نتیجه: طبق ض.ض.ض ⇒ هم‌نهشتی.'].join(' '); }
+  function sasProof(){ return ['فرض: دو ضلع و زاویهٔ بین برابرند.','نتیجه: طبق ض.ز.ض ⇒ هم‌نهشتی.'].join(' '); }
+  function asaProof(){ return ['فرض: دو زاویه و ضلع بین آن‌ها برابرند.','نتیجه: طبق ز.ض.ز ⇒ هم‌نهشتی.'].join(' '); }
+  function rhsProof(){ return ['فرض: مثلث‌ها قائمه و وتر و یک ضلع برابرند.','نتیجه: طبق و.ض ⇒ هم‌نهشتی.'].join(' '); }
+  function rAngleProof(){ return ['فرض: مثلث‌ها قائمه و وتر و یک زاویه برابرند.','نتیجه: طبق و.ز ⇒ هم‌نهشتی.'].join(' '); }
+
   function setResult(obj){
     if(!obj){ methodEl.innerText='—'; farzEl.innerText='—'; hokmEl.innerText='—'; proofEl.innerText='هیچ‌یک از معیارها برقرار نیست.'; return; }
-    methodEl.innerText = obj.method; farzEl.innerText = obj.farz; hokmEl.innerText = obj.hokm; proofEl.innerText = obj.proof;
+    methodEl.innerText = obj.method; farzEl.innerText = obj.farz; hokmEl.innerText = obj.hokm; proofEl.innerText = obj.proofSteps;
   }
 
   // check
   function checkAndShow(){
     const tA = A.getPoints(), tB = B.getPoints();
-    if(tA.length!==3 || tB.length!==3){ alert('هر دو مثلث باید ۳ نقطه داشته باشند.'); return; }
+    if(tA.length !==3 || tB.length !==3){ alert('هر دو مثلث باید ۳ نقطه داشته باشند.'); return; }
     const res = detectMethod(tA,tB);
     setResult(res);
-    if(res){ playSuccess(); scoreInc(10); } else playClick();
+    if(res) { tone(1200,0.06,0.003); incrementScore(10); } else tone(380,0.05,0.002);
   }
 
-  // snap
-  function snapAlign(){
-    const tA = A.getPoints(), tB = B.getPoints();
-    if(tA.length !==3){ A.ensureRandom(40); return; }
-    if(tB.length !==3){ B.setPoints([{x:tA[0].x+30,y:tA[0].y},{x:tA[1].x+30,y:tA[1].y},{x:tA[2].x+30,y:tA[2].y}]); return; }
-    const cxA = (tA[0].x+tA[1].x+tA[2].x)/3, cyA=(tA[0].y+tA[1].y+tA[2].y)/3;
-    const cxB = (tB[0].x+tB[1].x+tB[2].x)/3, cyB=(tB[0].y+tB[1].y+tB[2].y)/3;
-    const dx = cxA-cxB, dy = cyA-cyB;
-    B.setPoints(tB.map(p=>({x:p.x+dx,y:p.y+dy})));
-    playClick();
+  // show metrics (lengths & angles)
+  function formatNum(n){ return Math.round(n); }
+  function computeMetrics(pts){
+    if(pts.length !== 3) return { sides: ['—','—','—'], angles: ['—','—','—'] };
+    const s = [ dist(pts[0],pts[1]), dist(pts[1],pts[2]), dist(pts[2],pts[0]) ].map(formatNum);
+    const ang = [ angle(pts[1],pts[0],pts[2]), angle(pts[0],pts[1],pts[2]), angle(pts[0],pts[2],pts[1]) ].map(a => Math.round(a));
+    return { sides: s, angles: ang };
+  }
+  function updateAllMetrics(){
+    const mA = computeMetrics(A.getPoints()), mB = computeMetrics(B.getPoints());
+    metricsA.innerText = `اضلاع: ${mA.sides.join(' — ')}  |  زوایا: ${mA.angles.join('°  ')}°`;
+    metricsB.innerText = `اضلاع: ${mB.sides.join(' — ')}  |  زوایا: ${mB.angles.join('°  ')}°`;
+  }
+
+  // snap (grid align)
+  function snapAll(){
+    [A,B].forEach(board=>{
+      const pts = board.getPoints();
+      pts.forEach(p=>{ p.x = Math.round(p.x/12)*12; p.y = Math.round(p.y/12)*12; });
+      board.setPoints(pts);
+    });
+    tone(800,0.05,0.002);
   }
 
   // game
-  let gameState = { level:0, score:0, target:null };
+  let gameState = { level:0, score:0, isCongruent:null, method:null };
   function startChallenge(){
-    gameState.level += 1; levelEl.innerText = gameState.level; gameHint.innerText = 'در حال تولید...';
+    gameState.level += 1; levelEl.innerText = gameState.level; gameHint.innerText = 'در حال تولید چالش...';
     A.clear(); B.clear();
     A.ensureRandom(40);
+
+    // choose uniformly among methods (we map to Persian ones)
+    const methods = ['SSS','SAS','ASA','RHS','R-angle'];
+    const chosen = methods[Math.floor(Math.random()*methods.length)];
+    gameState.method = chosen;
+
     const make = Math.random() < PROB_CONGRUENT;
+    gameState.isCongruent = make;
+
     if(make){
       const base = A.getPoints();
-      const ang = Math.random()*Math.PI*2; const sc = 0.95+Math.random()*0.12;
-      const tx = (Math.random()*60)-30; const ty = (Math.random()*60)-30;
-      const newB = transformCopy(base,{rotate:ang, scale:sc, tx:tx, ty:ty});
+      const newB = transformCopy(base, {rotate: Math.random()*Math.PI*2, scale:1, tx: 30 + Math.random()*40, ty: -30 + Math.random()*60});
       B.setPoints(newB);
-      gameHint.innerText = 'هدف: برقراری هم‌نهشتی (سیستم انتخاب کرد).';
+      gameHint.innerText = 'سیستم: اکنون دو مثلث هم‌نهشت هستند — حدس بزن.';
     } else {
-      B.ensureRandom(160); gameHint.innerText = 'هدف: غیرهم‌نهشت (آزمون سخت).';
+      B.ensureRandom(160);
+      gameHint.innerText = 'سیستم: اکنون دو مثلث هم‌نهشت نیستند — حدس بزن.';
     }
+    clearResult();
+    updateAllMetrics();
   }
 
   function transformCopy(pts, opts){
@@ -227,34 +280,40 @@ document.addEventListener('DOMContentLoaded', ()=> {
     });
   }
 
-  function maybeMakeBCongruent(){ if(Math.random() < PROB_CONGRUENT && A.getPoints().length===3){ const base = A.getPoints(); const ang = Math.random()*Math.PI*2; const sc = 0.95 + Math.random()*0.1; const tx = (Math.random()*80)-40; const ty = (Math.random()*80)-40; const newB = transformCopy(base,{rotate:ang, scale:sc, tx:tx, ty:ty}); B.setPoints(newB); } }
+  function maybeMakeBCongruent(){ if(Math.random() < PROB_CONGRUENT && A.getPoints().length===3){ const base = A.getPoints(); const newB = transformCopy(base,{rotate:Math.random()*Math.PI*2, scale:0.98 + Math.random()*0.04, tx:(Math.random()*80)-40, ty:(Math.random()*80)-40}); B.setPoints(newB); } }
+
+  // presentExample (جایگزین پاکسازی) - ارائه یک مثل نمونه آموزنده
+  function presentExample(){
+    A.clear(); B.clear();
+    // یک مثال آموزنده: یک مثلث قائم به همراه یک هم‌نهشت مطابق
+    A.setPoints([{x:80,y:260},{x:170,y:120},{x:260,y:260}]); // یک مثلث
+    const copy = transformCopy(A.getPoints(), {rotate: 0.6, scale:1, tx: 120, ty:-40});
+    B.setPoints(copy);
+    gameHint.innerText = 'مثال: این دو مثلث برای آموزش ارائه شدند — روی «بررسی هم‌نهشتی» بزن.';
+    updateAllMetrics();
+  }
+
+  // guess handling
+  function makeGuess(guessYes){
+    if(gameState.isCongruent === null){ alert('ابتدا روی «چالش جدید» بزن'); return; }
+    const correct = gameState.isCongruent === guessYes;
+    if(correct){
+      tone(1200,0.06,0.003); incrementScore(15); alert('آفرین! حدست درست بود ✅ — حالا روی «بررسی هم‌نهشتی» بزن تا فرض/حکم/اثبات را ببینی.');
+    } else {
+      tone(360,0.06,0.002); alert('حدست درست نبود ❌ — روی «بررسی هم‌نهشتی» بزن تا علت را ببینی.');
+    }
+  }
 
   // score
-  function scoreInc(n){ gameState.score += n; scoreEl.innerText = gameState.score; }
+  function incrementScore(n){ gameState.score += n; scoreEl.innerText = gameState.score; }
 
-  // result clear
+  // clear result
   function clearResult(){ setResult(null); }
 
-  // expose some useful for debug
-  window.A = A; window.B = B; window.checkAndShow = checkAndShow; window.startChallenge = startChallenge;
+  // expose for debug
+  window.A = A; window.B = B; window.startChallenge = startChallenge; window.checkAndShow = checkAndShow;
 
-  // init: create demo triangles
-  A.setPoints([{x:60,y:220},{x:150,y:80},{x:260,y:240}]);
-  B.setPoints([{x:320,y:200},{x:400,y:90},{x:420,y:240}]);
-  scoreEl.innerText = 0; levelEl.innerText = 0;
-
-  // attach global simple buttons (those outside canvases)
-  btnRandA.addEventListener('click', ()=> { A.ensureRandom(40); if(currentModeIsGame()) maybeMakeBCongruent(); });
-  btnRandB.addEventListener('click', ()=> { B.ensureRandom(160); });
-  checkBtn.addEventListener('click', checkAndShow);
-  snapBtn.addEventListener('click', snapAlign);
-  challengeBtn.addEventListener('click', startChallenge);
-  btnReset.addEventListener('click', ()=> { A.clear(); B.clear(); clearResult(); });
-
-  function currentModeIsGame(){ return currentMode === 'game'; }
-
-  // small helpers: playClick/Success for other places
-  function playClick(){ if(!audioCtx || muted) return; const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type='sine'; o.frequency.value=700; g.gain.value=0.002; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime+0.04); o.stop(audioCtx.currentTime+0.04); }
-  function playSuccess(){ if(!audioCtx || muted) return; const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type='sine'; o.frequency.value=1200; g.gain.value=0.003; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime+0.06); o.stop(audioCtx.currentTime+0.06); }
+  // ensure metrics visible
+  updateAllMetrics();
 
 }); // DOMContentLoaded end
