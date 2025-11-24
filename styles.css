@@ -1,40 +1,32 @@
-:root{
-  --card:#fff; --accent1:#ff9aa2; --accent2:#ffb347; --accent3:#60a5fa; --muted:#6b7280;
-  font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+body {
+    font-family: sans-serif;
+    background: #eef2ff;
+    text-align: center;
+    direction: rtl;
 }
-*{box-sizing:border-box}
-body{margin:0;background:linear-gradient(180deg,#fbfbff,#f7f4ff);color:#102028}
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px;background:linear-gradient(90deg,#ffdbe6,#e6f0ff);box-shadow:0 6px 20px rgba(0,0,0,0.06);gap:12px;flex-wrap:wrap}
-.brand .title{font-weight:900;font-size:18px}
-.brand .subtitle{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
-.stickerImg{width:44px;height:44px;border-radius:8px;border:2px solid rgba(0,0,0,0.06)}
-.nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.btn{padding:8px 12px;border-radius:10px;border:none;cursor:pointer;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.04);font-weight:700}
-.btn.primary{background:linear-gradient(180deg,var(--accent2),var(--accent1));color:#021428}
-.btn.ghost{background:transparent;border:2px solid rgba(0,0,0,0.06)}
-.container{display:flex;gap:16px;max-width:1200px;margin:18px auto;padding:8px;align-items:flex-start}
-.leftCol{flex:1}
-.rightCol{width:360px}
-.boardCard{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.04)}
-.boardHeader{display:flex;flex-direction:column;gap:6px}
-.canvases{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-.canvasWrap{display:flex;flex-direction:column;align-items:center;gap:8px}
-.canvasTitle{font-weight:800;color:#333}
-.sticker{margin-left:8px;transform:translateY(-2px)}
-.canvas{width:420px;height:420px;border-radius:12px;border:3px solid rgba(0,0,0,0.06);background-color:#fff; background-image: linear-gradient(0deg, rgba(0,0,0,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px); background-size: 24px 24px; touch-action:none; box-shadow:0 12px 30px rgba(2,6,23,0.06)}
-.canvasBtns{display:flex;gap:6px;margin-top:6px}
-.metrics{margin-top:8px;font-size:13px;color:var(--muted);background:#fff7; padding:6px;border-radius:8px;border:1px solid rgba(0,0,0,0.03); width:88%; text-align:center}
-.controlsRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
-.panel{background:linear-gradient(180deg,#fffefc,#fff7f2);padding:12px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.04)}
-.kv{background:#fff;padding:8px;border-radius:10px;margin-top:8px;border:1px dashed rgba(0,0,0,0.04)}
-.small{font-size:13px;color:var(--muted)}
-.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:500}
-.modal.hidden{display:none}
-.modalCard{background:#fff;padding:18px;border-radius:12px;max-width:720px;width:92%;direction:rtl;text-align:right;box-shadow:0 24px 60px rgba(0,0,0,0.12)}
-.close{position:absolute;left:18px;top:14px;border:none;background:none;font-size:22px;cursor:pointer}
-.footer{margin:22px auto;text-align:center;color:var(--muted);font-size:14px}
-@media (max-width:1100px){
-  .canvas{width:86vw;height:86vw}
-  .container{flex-direction:column;padding:12px}
-  .rightCol{width:100%}
+
+canvas {
+    border: 2px solid #4b6bfb;
+    background: white;
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 14px;
+    margin: 8px;
+    border: none;
+    border-radius: 8px;
+    background: #4b6bfb;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+}
+button:hover {
+    background: #3554d1;
+}
+
+.icon {
+    width: 22px;
+    vertical-align: middle;
+    margin-left: 4px;
 }
