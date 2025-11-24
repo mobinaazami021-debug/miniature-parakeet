@@ -1,32 +1,55 @@
 body {
-    font-family: sans-serif;
-    background: #eef2ff;
-    text-align: center;
+    font-family: "Vazirmatn", sans-serif;
+    background: #eef2f3;
     direction: rtl;
+    text-align: center;
+    margin: 0;
+    padding: 0;
 }
 
-canvas {
-    border: 2px solid #4b6bfb;
-    background: white;
-    margin-top: 20px;
+#menu {
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px #999;
 }
 
 button {
-    padding: 10px 14px;
-    margin: 8px;
+    background: #ffcb66;
     border: none;
-    border-radius: 8px;
-    background: #4b6bfb;
-    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 15px;
-}
-button:hover {
-    background: #3554d1;
+    margin: 6px;
+    font-size: 16px;
+    transition: 0.2s;
 }
 
-.icon {
-    width: 22px;
-    vertical-align: middle;
-    margin-left: 4px;
+button:hover {
+    background: #ffb843;
+}
+
+.section {
+    display: none;
+    padding: 20px;
+}
+
+canvas {
+    background-image: linear-gradient(90deg, #ccc 1px, transparent 1px),
+                      linear-gradient(#ccc 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-color: #ffffff;
+    border: 2px solid #444;
+    border-radius: 10px;
+    margin: 10px;
+}
+
+.board-row {
+    display: flex;
+    justify-content: center;
+}
+
+#resultBox {
+    margin-top: 15px;
+    padding: 12px;
+    font-size: 18px;
 }
