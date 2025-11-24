@@ -1,96 +1,101 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>آزمایشگاه هم‌نهشتی — مبینا اعظمی</title>
+  <title>آزمایشگاه هم‌نهشتی مثلث‌ها — پایه ۹</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="title">آزمایشگاه هم‌نهشتی — بازی‌محور</div>
-      <div class="subtitle">ارائه‌دهنده: مبینا اعظمی — کلاس 9/2 — مدرسه پردیس</div>
+
+<header class="site-header">
+  <div class="brand">
+    <h1>آزمایشگاه هم‌نهشتی — ریاضی نهم</h1>
+    <div class="subtitle">ارائه‌دهنده: مبینا اعظمی — کلاس ۹/۲ — مدرسه پردیس</div>
+  </div>
+  <!-- تصویر تزئینی (در صورت نیاز حذفش کن) -->
+  <img src="/mnt/data/2025-11-24T10-52-21.978Z.jpg" alt="illustration" class="hero-illustration">
+</header>
+
+<nav class="main-nav">
+  <a href="index.html" class="nav-btn active">خانه</a>
+  <a href="edu.html" class="nav-btn">آموزش فصل ۳</a>
+  <a href="quiz.html" class="nav-btn">تمرین‌ها</a>
+  <button id="openLab" class="nav-btn primary">باز کردن آزمایشگاه</button>
+  <button id="openGame" class="nav-btn primary outline">شروع بازی</button>
+</nav>
+
+<main class="main">
+  <section class="intro card">
+    <h2>خوش آمدی!</h2>
+    <p>اینجا محیطی تعاملی و کارتونی برای یادگیری هم‌نهشتی مثلث‌هاست. می‌توانی آزمایشگاه را باز کرده و دو مثلث بسازی، یا با حالت بازی تمرین کنی، یا به بخش آموزش برای مرور مفاهیم بروی.</p>
+    <div class="quick-actions">
+      <button id="btnLabLarge" class="btn">باز کردن آزمایشگاه</button>
+      <a href="edu.html" class="btn ghost">رفتن به آموزش فصل ۳</a>
     </div>
-    <img src="/mnt/data/0959380C-77D8-42A2-A2A9-84F93645D0D9.jpeg" alt="sticker" class="sticker">
-  </header>
+  </section>
 
-  <nav class="mainnav">
-    <button id="btnLearn" class="btn ghost">📘 آموزش</button>
-    <button id="btnBuild" class="btn">✏️ ساخت مثلث</button>
-    <button id="btnGame" class="btn">🎮 بازی</button>
-    <button id="btnPresent" class="btn ghost">🎲 ارائه مثل جدید</button>
-    <button id="btnMute" class="btn ghost">🔈 بی‌صدا</button>
-  </nav>
-
-  <main class="container">
-    <!-- LEFT: builder / game area -->
-    <section class="left">
-      <div id="panelBuild" class="card hidden">
-        <h3>ساخت مثلث (روی صفحه کلیک کن — ۳ نقطه می‌سازد)</h3>
-        <canvas id="canvasBuild" class="canvas" width="720" height="480" aria-label="بوم ساخت"></canvas>
-        <div class="row">
-          <button id="btnClearBuild" class="btn ghost">پاک کردن</button>
-          <button id="btnSnap" class="btn ghost">🔧 چسباندن شبکه</button>
-        </div>
-        <div id="buildInfo" class="info small">اضلاع/زاویه‌ها: —</div>
+  <!-- آزمایشگاه (درون صفحه برای دسترسی سریع) -->
+  <section id="lab" class="card hidden">
+    <h3>آزمایشگاه — ساخت و مقایسه دو مثلث</h3>
+    <div class="lab-top">
+      <div class="lab-controls">
+        <button id="btnNewPair" class="btn primary">ارائه مثل جدید</button>
+        <button id="btnSnap" class="btn">چسباندن به شبکه</button>
+        <button id="btnClear" class="btn">پاک‌سازی (شروع دوباره)</button>
+        <label class="small">دقت:
+          <select id="sensitivity">
+            <option value="low">کم</option>
+            <option value="med" selected>متوسط</option>
+            <option value="high">زیاد</option>
+          </select>
+        </label>
       </div>
-
-      <div id="panelGame" class="card hidden">
-        <h3>بخش بازی — چالش هم‌نهشتی</h3>
-        <div class="twoCanvases">
-          <div class="canWrap">
-            <div class="canTitle">مثلث ۱</div>
-            <canvas id="canvasA" class="smallCanvas" width="360" height="360"></canvas>
-            <div id="metricsA" class="metrics">اضلاع: — | زوایا: —</div>
-          </div>
-          <div class="canWrap">
-            <div class="canTitle">مثلث ۲</div>
-            <canvas id="canvasB" class="smallCanvas" width="360" height="360"></canvas>
-            <div id="metricsB" class="metrics">اضلاع: — | زوایا: —</div>
-          </div>
-        </div>
-
-        <div class="controls">
-          <button id="btnNewChallenge" class="btn primary">🎯 چالش جدید</button>
-          <button id="btnCheck" class="btn primary">✅ بررسی هم‌نهشتی</button>
-        </div>
-
-        <div class="guessRow">
-          <button id="btnGuessYes" class="btn">هم‌نهشت هستند ✅</button>
-          <button id="btnGuessNo" class="btn ghost">هم‌نهشت نیستند ❌</button>
-        </div>
-
-        <div id="resultPanel" class="resultCard">
-          <div><strong>روش:</strong> <span id="method">—</span></div>
-          <div><strong>فرض:</strong> <div id="farz">—</div></div>
-          <div><strong>حکم:</strong> <div id="hokm">—</div></div>
-          <div><strong>اثبات (خلاصه):</strong> <div id="proof">—</div></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- RIGHT: help / tutorial / status -->
-    <aside class="right">
-      <div id="learnCard" class="card">
-        <h3>آموزش — چگونه کار کنم (مختصر برای دانش‌آموز)</h3>
-        <ol>
-          <li><b>ساخت مثلث:</b> روی بوم کلیک کن تا ۳ نقطه ساخته شود. نقاط را بکش تا شکل تغییر کند. زیر بوم اندازهٔ اضلاع و زوایا نمایش داده می‌شود.</li>
-          <li><b>بازی:</b> «چالش جدید» بزن تا دو مثلث ساخته شوند (۸۰٪ احتمال هم‌نهشتی). با دکمهٔ ✅ یا ❌ حدس بزن. سپس «بررسی هم‌نهشتی» را بزن تا فرض/حکم/اثبات نمایش یابد.</li>
-          <li><b>روش‌ها:</b> سیستم دو مثلث را با معیارهای: ض.ض.ض، ض.ز.ض، ز.ض.ز، و.ض، و.ز بررسی می‌کند.</li>
-        </ol>
-      </div>
-
-      <div class="card small">
-        <h4>وضعیت</h4>
+      <div class="lab-status">
         <div>سطح: <span id="level">0</span></div>
         <div>امتیاز: <span id="score">0</span></div>
       </div>
-    </aside>
-  </main>
+    </div>
 
-  <footer class="footer">طراحی و پیاده‌سازی برای کلاس — مبینا اعظمی</footer>
+    <div class="lab-canvas-row">
+      <div class="canvas-box">
+        <div class="canvas-title">مثلث ۱</div>
+        <canvas id="canvasA" width="420" height="420" class="lab-canvas"></canvas>
+        <div id="metricsA" class="metrics">اضلاع: — | زوایا: —</div>
+      </div>
 
-  <script src="script.js"></script>
+      <div class="canvas-box">
+        <div class="canvas-title">مثلث ۲</div>
+        <canvas id="canvasB" width="420" height="420" class="lab-canvas"></canvas>
+        <div id="metricsB" class="metrics">اضلاع: — | زوایا: —</div>
+      </div>
+    </div>
+
+    <div class="lab-actions">
+      <div class="guess-buttons">
+        <button id="guessYes" class="btn">هم‌نهشت هستند ✅</button>
+        <button id="guessNo" class="btn ghost">هم‌نهشت نیستند ❌</button>
+      </div>
+      <div class="check-actions">
+        <button id="btnCheck" class="btn primary">بررسی هم‌نهشتی</button>
+        <button id="btnShowProof" class="btn">نمایش فرض/حکم/اثبات</button>
+      </div>
+    </div>
+
+    <div id="resultPanel" class="result-panel">
+      <div><strong>روش:</strong> <span id="method">—</span></div>
+      <div><strong>فرض:</strong> <div id="farz">—</div></div>
+      <div><strong>حکم:</strong> <div id="hokm">—</div></div>
+      <div><strong>اثبات:</strong> <div id="proof">—</div></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div>ساخته شده برای آموزش — مبینا اعظمی — ریاضی نهم</div>
+</footer>
+
+<script src="script.js"></script>
 </body>
 </html>
