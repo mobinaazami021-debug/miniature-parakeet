@@ -1,48 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>آزمایشگاه هم‌نهشتی مثلث‌ها — پایه ۹</title>
+  <title>آزمایشگاه هم‌نهشتی — ریاضی نهم</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-<header class="site-header">
-  <div class="brand">
-    <h1>آزمایشگاه هم‌نهشتی — ریاضی نهم</h1>
-    <div class="subtitle">ارائه‌دهنده: مبینا اعظمی — کلاس ۹/۲ — مدرسه پردیس</div>
-  </div>
-  <!-- تصویر تزئینی (در صورت نیاز حذفش کن) -->
-  <img src="/mnt/data/2025-11-24T10-52-21.978Z.jpg" alt="illustration" class="hero-illustration">
-</header>
-
-<nav class="main-nav">
-  <a href="index.html" class="nav-btn active">خانه</a>
-  <a href="edu.html" class="nav-btn">آموزش فصل ۳</a>
-  <a href="quiz.html" class="nav-btn">تمرین‌ها</a>
-  <button id="openLab" class="nav-btn primary">باز کردن آزمایشگاه</button>
-  <button id="openGame" class="nav-btn primary outline">شروع بازی</button>
-</nav>
-
-<main class="main">
-  <section class="intro card">
-    <h2>خوش آمدی!</h2>
-    <p>اینجا محیطی تعاملی و کارتونی برای یادگیری هم‌نهشتی مثلث‌هاست. می‌توانی آزمایشگاه را باز کرده و دو مثلث بسازی، یا با حالت بازی تمرین کنی، یا به بخش آموزش برای مرور مفاهیم بروی.</p>
-    <div class="quick-actions">
-      <button id="btnLabLarge" class="btn">باز کردن آزمایشگاه</button>
-      <a href="edu.html" class="btn ghost">رفتن به آموزش فصل ۳</a>
+  <header class="header">
+    <div class="brand">
+      <h1>آزمایشگاه تعاملی هم‌نهشتی مثلث‌ها</h1>
+      <div class="credit">ارائه‌دهنده: مبینا اعظمی — کلاس ۹/۲ — مدرسه پردیس</div>
     </div>
-  </section>
+    <!-- تصویر آپلود شده (در این نسخه پنهان است، سیستم مسیر را تبدیل می‌کند) -->
+    <img src="/mnt/data/2025-11-24T10-52-21.978Z.jpg" alt="" style="display:none">
+  </header>
 
-  <!-- آزمایشگاه (درون صفحه برای دسترسی سریع) -->
-  <section id="lab" class="card hidden">
-    <h3>آزمایشگاه — ساخت و مقایسه دو مثلث</h3>
-    <div class="lab-top">
-      <div class="lab-controls">
-        <button id="btnNewPair" class="btn primary">ارائه مثل جدید</button>
-        <button id="btnSnap" class="btn">چسباندن به شبکه</button>
-        <button id="btnClear" class="btn">پاک‌سازی (شروع دوباره)</button>
+  <main class="main">
+    <section class="lab-card">
+      <div class="lab-head">
+        <h2>آزمایشگاه — ساخت و مقایسه دو مثلث</h2>
+        <p class="lead">روی شبکه کار کن: مثلث‌ها را بساز یا «ارائه مثل جدید» بزن. برای موبایل هم کار می‌کند — نقطه اضافه کن، درگ کن.</p>
+      </div>
+
+      <div class="controls">
+        <button id="btnNew" class="btn primary">🎲 ارائه مثل جدید</button>
+        <button id="btnCheck" class="btn">🔎 بررسی هم‌نهشتی</button>
+        <button id="btnShowProof" class="btn">📜 فرض/حکم/اثبات</button>
+        <button id="btnClear" class="btn ghost">🧽 پاک‌سازی</button>
         <label class="small">دقت:
           <select id="sensitivity">
             <option value="low">کم</option>
@@ -51,51 +36,43 @@
           </select>
         </label>
       </div>
-      <div class="lab-status">
-        <div>سطح: <span id="level">0</span></div>
-        <div>امتیاز: <span id="score">0</span></div>
+
+      <div class="canvas-row">
+        <div class="canvas-box">
+          <div class="canvas-title">مثلث ۱</div>
+          <canvas id="canvasA" class="lab-canvas" width="420" height="420" aria-label="مثلث اول"></canvas>
+          <div id="metricsA" class="metrics">اضلاع: — | زوایا: —</div>
+        </div>
+
+        <div class="canvas-box">
+          <div class="canvas-title">مثلث ۲</div>
+          <canvas id="canvasB" class="lab-canvas" width="420" height="420" aria-label="مثلث دوم"></canvas>
+          <div id="metricsB" class="metrics">اضلاع: — | زوایا: —</div>
+        </div>
       </div>
-    </div>
 
-    <div class="lab-canvas-row">
-      <div class="canvas-box">
-        <div class="canvas-title">مثلث ۱</div>
-        <canvas id="canvasA" width="420" height="420" class="lab-canvas"></canvas>
-        <div id="metricsA" class="metrics">اضلاع: — | زوایا: —</div>
+      <div class="actions-row">
+        <div class="guess">
+          <button id="btnGuessYes" class="btn success">هم‌نهشت هستند ✅</button>
+          <button id="btnGuessNo" class="btn danger">هم‌نهشت نیستند ❌</button>
+        </div>
+        <div class="status">
+          <div>سطح: <span id="level">0</span></div>
+          <div>امتیاز: <span id="score">0</span></div>
+        </div>
       </div>
 
-      <div class="canvas-box">
-        <div class="canvas-title">مثلث ۲</div>
-        <canvas id="canvasB" width="420" height="420" class="lab-canvas"></canvas>
-        <div id="metricsB" class="metrics">اضلاع: — | زوایا: —</div>
+      <div id="resultPanel" class="result-panel">
+        <div><strong>روش تشخیص:</strong> <span id="method">—</span></div>
+        <div><strong>فرض:</strong> <div id="farz">—</div></div>
+        <div><strong>حکم:</strong> <div id="hokm">—</div></div>
+        <div><strong>اثبات:</strong> <div id="proof">—</div></div>
       </div>
-    </div>
+    </section>
+  </main>
 
-    <div class="lab-actions">
-      <div class="guess-buttons">
-        <button id="guessYes" class="btn">هم‌نهشت هستند ✅</button>
-        <button id="guessNo" class="btn ghost">هم‌نهشت نیستند ❌</button>
-      </div>
-      <div class="check-actions">
-        <button id="btnCheck" class="btn primary">بررسی هم‌نهشتی</button>
-        <button id="btnShowProof" class="btn">نمایش فرض/حکم/اثبات</button>
-      </div>
-    </div>
+  <footer class="footer">این ابزار مناسب فصل ۳ ریاضی نهم است — طراحی کارتونی و تعاملی</footer>
 
-    <div id="resultPanel" class="result-panel">
-      <div><strong>روش:</strong> <span id="method">—</span></div>
-      <div><strong>فرض:</strong> <div id="farz">—</div></div>
-      <div><strong>حکم:</strong> <div id="hokm">—</div></div>
-      <div><strong>اثبات:</strong> <div id="proof">—</div></div>
-    </div>
-  </section>
-
-</main>
-
-<footer class="site-footer">
-  <div>ساخته شده برای آموزش — مبینا اعظمی — ریاضی نهم</div>
-</footer>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
