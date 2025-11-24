@@ -1,69 +1,87 @@
-// نهایی — همه دکمه‌ها وصل و تست‌شده
-document.addEventListener('DOMContentLoaded', ()=> {
-  // config
-  const PROB_CONGRUENT = 0.8;
-  const TOL = { low: 10, med: 6, high: 3 };
-  let sensitivity = 'med';
-  let muted = false;
-  let level=0, score=0;
+// script.js — موتور اصلی آزمایشگاه هم‌نهشتی
+document.addEventListener('DOMContentLoaded', () => {
+  // ---------- تنظیمات ----------
+  const PROB_CONGRUENT = 0.8; // احتمال هم‌نهشتی در "ارائه مثل جدید"
+  const TOL = { low: 12, med: 7, high: 3 };
+  const ANG = { low: 6.5, med: 4.5, high: 2.0 };
 
   // DOM
-  const btnLearn = document.getElementById('btnLearn');
-  const btnBuild = document.getElementById('btnBuild');
-  const btnGame = document.getElementById('btnGame');
-  const btnPresent = document.getElementById('btnPresent');
-  const btnMute = document.getElementById('btnMute');
+  const labSection = document.getElementById('lab');
+  const btnLab = document.getElementById('openLab');
+  const btnGame = document.getElementById('openGame');
+  const btnNewPair = document.getElementById('btnNewPair');
+  const btnSnap = document.getElementById('btnSnap');
+  const btnClear = document.getElementById('btnClear');
+  const btnCheck = document.getElementById('btnCheck');
+  const btnShowProof = document.getElementById('btnShowProof');
+  const guessYes = document.getElementById('guessYes');
+  const guessNo = document.getElementById('guessNo');
+  const metricsA = document.getElementById('metricsA');
+  const metricsB = document.getElementById('metricsB');
+  const methodEl = document.getElementById('method');
+  const farzEl = document.getElementById('farz');
+  const hokmEl = document.getElementById('hokm');
+  const proofEl = document.getElementById('proof');
+  const levelEl = document.getElementById('level');
+  const scoreEl = document.getElementById('score');
+  const sensitivitySel = document.getElementById('sensitivity');
 
-  const panelBuild = document.getElementById('panelBuild');
-  const panelGame = document.getElementById('panelGame');
-  const learnCard = document.getElementById('learnCard');
-
-  const buildCanvas = document.getElementById('canvasBuild');
-  const ctxBuild = buildCanvas.getContext('2d');
-
+  // canvases
   const canvasA = document.getElementById('canvasA'), ctxA = canvasA.getContext('2d');
   const canvasB = document.getElementById('canvasB'), ctxB = canvasB.getContext('2d');
 
-  const metricsA = document.getElementById('metricsA'), metricsB = document.getElementById('metricsB');
-  const methodEl = document.getElementById('method'), farzEl = document.getElementById('farz'), hokmEl = document.getElementById('hokm'), proofEl = document.getElementById('proof');
+  // state
+  let sensitivity = 'med';
+  let level = 0, score = 0;
+  let tA = [], tB = [];
+  let gameState = { isCongruent: null, method: null };
 
-  const btnNewChallenge = document.getElementById('btnNewChallenge');
-  const btnCheck = document.getElementById('btnCheck');
-  const btnGuessYes = document.getElementById('btnGuessYes');
-  const btnGuessNo = document.getElementById('btnGuessNo');
-  const btnSnap = document.getElementById('btnSnap');
-  const btnClearBuild = document.getElementById('btnClearBuild');
-
-  const levelEl = document.getElementById('level'), scoreEl = document.getElementById('score');
-
-  // utility geometry
-  function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
-  function angle(A,B,C){
-    const BA = dist(B,A), BC=dist(B,C), AC=dist(A,C);
-    const cosv = (BA*BA + BC*BC - AC*AC)/(2*BA*BC);
-    return Math.round(Math.acos(Math.max(-1,Math.min(1,cosv)))*180/Math.PI);
+  // audio (کوتاه و محلی)
+  const audioEnabled = true;
+  function tone(freq=880, time=0.05){
+    try{
+      if(!audioEnabled) return;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type='sine'; o.frequency.value=freq; g.gain.value=0.01;
+      o.connect(g); g.connect(ctx.destination);
+      o.start(); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + time);
+      o.stop(ctx.currentTime+time);
+    }catch(e){}
   }
 
-  // draw helpers (with grid)
-  function clearCanvas(ctx, w, h){
-    ctx.clearRect(0,0,w,h);
-    // light grid
+  // ---------- هندسه ----------
+  function dist(p,q){ return Math.hypot(p.x-q.x, p.y-q.y); }
+  function angle(A,B,C){
+    const AB = dist(A,B), CB = dist(C,B), AC = dist(A,C);
+    if(AB===0 || CB===0) return 0;
+    const cosv = (AB*AB + CB*CB - AC*AC)/(2*AB*CB);
+    return Math.acos(Math.max(-1,Math.min(1,cosv))) * 180/Math.PI;
+  }
+  function approx(a,b,eps){ return Math.abs(a-b) <= eps; }
+  function isRight(pts){
+    const angs = [ angle(pts[1],pts[0],pts[2]), angle(pts[0],pts[1],pts[2]), angle(pts[0],pts[2],pts[1]) ];
+    return angs.some(a => Math.abs(a-90) < 3.5);
+  }
+
+  // ---------- رسم و نمایش متریک‌ها ----------
+  function clearCanvas(ctx){
+    ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
+    // grid
     ctx.save();
     ctx.strokeStyle = 'rgba(0,0,0,0.04)';
-    ctx.lineWidth = 1;
-    for(let x=0;x<w;x+=24){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-    for(let y=0;y<h;y+=24){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    for(let x=0;x<ctx.canvas.width;x+=24){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,ctx.canvas.height); ctx.stroke(); }
+    for(let y=0;y<ctx.canvas.height;y+=24){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(ctx.canvas.width,y); ctx.stroke(); }
     ctx.restore();
   }
 
-  function drawTriangleOn(ctx, pts, highlight){
-    const w=ctx.canvas.width, h=ctx.canvas.height;
-    clearCanvas(ctx,w,h);
-    if(pts.length<3) return;
+  function drawTriangle(ctx, pts, highlight=false){
+    clearCanvas(ctx);
+    if(pts.length < 3) return;
     ctx.beginPath();
-    ctx.moveTo(pts[0].x,pts[0].y);
-    ctx.lineTo(pts[1].x,pts[1].y);
-    ctx.lineTo(pts[2].x,pts[2].y);
+    ctx.moveTo(pts[0].x, pts[0].y);
+    ctx.lineTo(pts[1].x, pts[1].y);
+    ctx.lineTo(pts[2].x, pts[2].y);
     ctx.closePath();
     ctx.fillStyle = 'rgba(96,165,250,0.06)';
     ctx.fill();
@@ -71,203 +89,184 @@ document.addEventListener('DOMContentLoaded', ()=> {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // draw points
-    ctx.fillStyle = '#ffb347';
-    for(let i=0;i<3;i++){
-      const p=pts[i];
-      ctx.beginPath(); ctx.arc(p.x,p.y,7,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#021428';
-      ctx.font='13px Vazirmatn, sans-serif';
-      ctx.fillText(['A','B','C'][i], p.x-6, p.y+5);
-      ctx.fillStyle='#ffb347';
-    }
+    // vertices
+    pts.forEach((p,i)=>{
+      ctx.beginPath(); ctx.fillStyle = '#ffb347'; ctx.arc(p.x,p.y,7,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#021428'; ctx.font='12px Vazirmatn, sans-serif'; ctx.fillText(['A','B','C'][i], p.x-6, p.y+5);
+      ctx.fillStyle = '#ffb347';
+    });
 
-    // side lengths & angles
+    // sides & angles
     const a = dist(pts[1],pts[2]), b = dist(pts[0],pts[2]), c = dist(pts[0],pts[1]);
-    ctx.fillStyle='#0b2340'; ctx.font='13px Vazirmatn, sans-serif';
-    ctx.fillText('a='+Math.round(a), (pts[1].x+pts[2].x)/2, (pts[1].y+pts[2].y)/2 +6);
-    ctx.fillText('b='+Math.round(b), (pts[0].x+pts[2].x)/2, (pts[0].y+pts[2].y)/2 +6);
-    ctx.fillText('c='+Math.round(c), (pts[0].x+pts[1].x)/2, (pts[0].y+pts[1].y)/2 -6);
+    ctx.fillStyle = '#0b2340'; ctx.font='13px Vazirmatn, sans-serif';
+    ctx.fillText('a=' + Math.round(a), (pts[1].x+pts[2].x)/2, (pts[1].y+pts[2].y)/2 +6);
+    ctx.fillText('b=' + Math.round(b), (pts[0].x+pts[2].x)/2, (pts[0].y+pts[2].y)/2 +6);
+    ctx.fillText('c=' + Math.round(c), (pts[0].x+pts[1].x)/2, (pts[0].y+pts[1].y)/2 -6);
 
-    ctx.fillText('∠A='+angle(pts[1],pts[0],pts[2])+'°', pts[0].x+8, pts[0].y+10);
-    ctx.fillText('∠B='+angle(pts[0],pts[1],pts[2])+'°', pts[1].x+8, pts[1].y+10);
-    ctx.fillText('∠C='+angle(pts[0],pts[2],pts[1])+'°', pts[2].x+8, pts[2].y-6);
-  }
-
-  // detect methods (Persian labels)
-  function approx(a,b,eps){ return Math.abs(a-b) <= eps; }
-  function isRight(pts){
-    const angs = [ angle(pts[1],pts[0],pts[2]), angle(pts[0],pts[1],pts[2]), angle(pts[0],pts[2],pts[1]) ];
-    return angs.some(a=>Math.abs(a-90) < 3.5);
-  }
-  function detectMethod(t1,t2){
-    const s1=[dist(t1[0],t1[1]),dist(t1[1],t1[2]),dist(t1[2],t1[0])].sort((a,b)=>a-b);
-    const s2=[dist(t2[0],t2[1]),dist(t2[1],t2[2]),dist(t2[2],t2[0])].sort((a,b)=>a-b);
-    const ang1=[ angle(t1[1],t1[0],t1[2]), angle(t1[0],t1[1],t1[2]), angle(t1[0],t1[2],t1[1]) ].sort((a,b)=>a-b);
-    const ang2=[ angle(t2[1],t2[0],t2[2]), angle(t2[0],t2[1],t2[2]), angle(t2[0],t2[2],t2[1]) ].sort((a,b)=>a-b);
-    const tol = 6;
-
-    if(approx(s1[0],s2[0],tol) && approx(s1[1],s2[1],tol) && approx(s1[2],s2[2],tol)){
-      return {method:'ض.ض.ض', farz:'سه ضلع متناظر برابرند.', hokm:'دو مثلث هم‌نهشت‌اند.', proof:'طبق ض.ض.ض ⇒ هم‌نهشتی.'};
-    }
-    if(approx(s1[0],s2[0],tol) && approx(s1[2],s2[2],tol) && approx(ang1[1],ang2[1],4)){
-      return {method:'ض.ز.ض', farz:'دو ضلع و زاویهٔ بین آن‌ها برابر است.', hokm:'دو مثلث هم‌نهشت‌اند.', proof:'طبق ض.ز.ض ⇒ هم‌نهشتی.'};
-    }
-    if(approx(ang1[0],ang2[0],4) && approx(ang1[2],ang2[2],4) && approx(s1[1],s2[1],tol)){
-      return {method:'ز.ض.ز', farz:'دو زاویه و ضلع بین آن‌ها برابرند.', hokm:'دو مثلث هم‌نهشت‌اند.', proof:'طبق ز.ض.ز ⇒ هم‌نهشتی.'};
-    }
-    if(isRight(t1) && isRight(t2) && approx(s1[1],s2[1],tol)){
-      return {method:'و.ض', farz:'وتر و یک ضلع قائمه برابرند.', hokm:'دو مثلث قائمه هم‌نهشت‌اند.', proof:'طبق و.ض ⇒ هم‌نهشتی.'};
-    }
-    if(isRight(t1) && isRight(t2) && approx(ang1[1],ang2[1],4)){
-      return {method:'و.ز', farz:'وتر و یک زاویه برابرند.', hokm:'دو مثلث قائمه هم‌نهشت‌اند.', proof:'طبق و.ز ⇒ هم‌نهشتی.'};
-    }
-    return null;
-  }
-
-  // proof templates use detectMethod result
-  function showResult(res){
-    if(!res){
-      methodEl.innerText='—'; farzEl.innerText='—'; hokmEl.innerText='—'; proofEl.innerText='هیچ معیار هم‌نهشتی برقرار نیست.';
-    } else {
-      methodEl.innerText = res.method; farzEl.innerText = res.farz; hokmEl.innerText = res.hokm; proofEl.innerText = res.proof;
-    }
-  }
-
-  // state
-  let buildPts = [];
-  let tA = [], tB = [];
-  let gameState = {isCongruent:null, method:null};
-
-  // ====== BUILD canvas handlers ======
-  function redrawBuild(){ clearCanvas(ctxBuild, buildCanvas.width, buildCanvas.height); if(buildPts.length===3) drawTriangleOn(ctxBuild, buildPts, true); updateBuildInfo(); }
-  function updateBuildInfo(){
-    const el = document.getElementById('buildInfo');
-    if(buildPts.length!==3){ el.innerText = 'اضلاع/زوایا: —'; return; }
-    const a=Math.round(dist(buildPts[1],buildPts[2])), b=Math.round(dist(buildPts[0],buildPts[2])), c=Math.round(dist(buildPts[0],buildPts[1]));
-    const Aang=angle(buildPts[1],buildPts[0],buildPts[2]), Bang=angle(buildPts[0],buildPts[1],buildPts[2]), Cang=angle(buildPts[0],buildPts[2],buildPts[1]);
-    el.innerText = `اضلاع: a=${a} b=${b} c=${c}  |  زوایا: ∠A=${Aang}° ∠B=${Bang}° ∠C=${Cang}°`;
-  }
-
-  buildCanvas.addEventListener('pointerdown', (e)=>{
-    const r = buildCanvas.getBoundingClientRect();
-    const p = {x: e.clientX - r.left, y: e.clientY - r.top};
-    if(buildPts.length < 3){ buildPts.push(p); redrawBuild(); return; }
-    // else enable drag of nearest point
-    let nearest=-1,md=9999; buildPts.forEach((pt,i)=>{ const d=dist(pt,p); if(d<md){md=d;nearest=i;}});
-    if(md < 16){ // start dragging
-      buildCanvas.isDragging = nearest;
-      buildCanvas.setPointerCapture(e.pointerId);
-    }
-  });
-  buildCanvas.addEventListener('pointermove',(e)=>{
-    if(buildCanvas.isDragging !== undefined && buildCanvas.isDragging !== null){
-      const r = buildCanvas.getBoundingClientRect();
-      const p= {x: e.clientX - r.left, y: e.clientY - r.top};
-      buildPts[buildCanvas.isDragging] = p; redrawBuild();
-    }
-  });
-  buildCanvas.addEventListener('pointerup',(e)=>{ buildCanvas.isDragging = null; });
-
-  btnClearBuild.addEventListener('click', ()=>{ buildPts = []; redrawBuild(); });
-
-  btnSnap.addEventListener('click', ()=>{
-    buildPts = buildPts.map(p=>({x: Math.round(p.x/12)*12, y: Math.round(p.y/12)*12})); redrawBuild();
-  });
-
-  // ====== GAME handlers ======
-  function randomTriangleOn(w,h){
-    return [
-      {x: 40 + Math.random()*(w-80), y: 40 + Math.random()*(h-80)},
-      {x: 40 + Math.random()*(w-80), y: 40 + Math.random()*(h-80)},
-      {x: 40 + Math.random()*(w-80), y: 40 + Math.random()*(h-80)}
-    ];
-  }
-
-  function presentPair(){
-    // always create triA; triB either congruent copy (80%) or random
-    tA = randomTriangleOn(canvasA.width, canvasA.height);
-    if(Math.random() < PROB_CONGRUENT){
-      // create congruent copy by translate+rotate+small scale
-      const angleR = Math.random()*Math.PI*2;
-      const scale = 0.96 + Math.random()*0.08;
-      const tx = 30 + Math.random()*80;
-      const ty = -20 + Math.random()*80;
-      tB = tA.map(p=>{
-        const cx = canvasA.width/2, cy = canvasA.height/2;
-        const x = p.x - cx, y = p.y - cy;
-        const rx = x*Math.cos(angleR) - y*Math.sin(angleR);
-        const ry = x*Math.sin(angleR) + y*Math.cos(angleR);
-        return {x: Math.round(rx*scale + cx + tx), y: Math.round(ry*scale + cy + ty)};
-      });
-      gameState.isCongruent = true;
-    } else {
-      tB = randomTriangleOn(canvasB.width, canvasB.height);
-      gameState.isCongruent = false;
-    }
-    drawTriangleOn(ctxA, tA, false); drawTriangleOn(ctxB, tB, false);
-    updateMetrics();
-    clearResult();
+    ctx.fillText('∠A=' + Math.round(angle(pts[1],pts[0],pts[2])) + '°', pts[0].x+8, pts[0].y+10);
+    ctx.fillText('∠B=' + Math.round(angle(pts[0],pts[1],pts[2])) + '°', pts[1].x+8, pts[1].y+10);
+    ctx.fillText('∠C=' + Math.round(angle(pts[0],pts[2],pts[1])) + '°', pts[2].x+8, pts[2].y-6);
   }
 
   function updateMetrics(){
     if(tA.length===3){
-      const aA = Math.round(dist(tA[1],tA[2])), bA = Math.round(dist(tA[0],tA[2])), cA = Math.round(dist(tA[0],tA[1]));
-      const Aang = angle(tA[1],tA[0],tA[2]), Bang = angle(tA[0],tA[1],tA[2]), Cang = angle(tA[0],tA[2],tA[1]);
-      metricsA.innerText = `اضلاع: ${aA}—${bA}—${cA}  |  زوایا: ${Aang}° ${Bang}° ${Cang}°`;
+      const a = Math.round(dist(tA[1],tA[2])), b = Math.round(dist(tA[0],tA[2])), c = Math.round(dist(tA[0],tA[1]));
+      const Aang = Math.round(angle(tA[1],tA[0],tA[2])), Bang = Math.round(angle(tA[0],tA[1],tA[2])), Cang = Math.round(angle(tA[0],tA[2],tA[1]));
+      metricsA.innerText = `اضلاع: ${a} — ${b} — ${c}  |  زوایا: ${Aang}° ${Bang}° ${Cang}°`;
     } else metricsA.innerText = 'اضلاع: — | زوایا: —';
+
     if(tB.length===3){
-      const aB = Math.round(dist(tB[1],tB[2])), bB = Math.round(dist(tB[0],tB[2])), cB = Math.round(dist(tB[0],tB[1]));
-      const Aang = angle(tB[1],tB[0],tB[2]), Bang = angle(tB[0],tB[1],tB[2]), Cang = angle(tB[0],tB[2],tB[1]);
-      metricsB.innerText = `اضلاع: ${aB}—${bB}—${cB}  |  زوایا: ${Aang}° ${Bang}° ${Cang}°`;
+      const a = Math.round(dist(tB[1],tB[2])), b = Math.round(dist(tB[0],tB[2])), c = Math.round(dist(tB[0],tB[1]));
+      const Aang = Math.round(angle(tB[1],tB[0],tB[2])), Bang = Math.round(angle(tB[0],tB[1],tB[2])), Cang = Math.round(angle(tB[0],tB[2],tB[1]));
+      metricsB.innerText = `اضلاع: ${a} — ${b} — ${c}  |  زوایا: ${Aang}° ${Bang}° ${Cang}°`;
     } else metricsB.innerText = 'اضلاع: — | زوایا: —';
   }
 
-  function clearResult(){ methodEl.innerText='—'; farzEl.innerText='—'; hokmEl.innerText='—'; proofEl.innerText='—'; }
+  // ---------- تشخیص هم‌نهشتی (حالت‌های مورد نظر شما) ----------
+  function detectMethod(pA, pB){
+    const sA = [dist(pA[0],pA[1]), dist(pA[1],pA[2]), dist(pA[2],pA[0])].sort((a,b)=>a-b);
+    const sB = [dist(pB[0],pB[1]), dist(pB[1],pB[2]), dist(pB[2],pB[0])].sort((a,b)=>a-b);
+    const angA = [ angle(pA[1],pA[0],pA[2]), angle(pA[0],pA[1],pA[2]), angle(pA[0],pA[2],pA[1]) ].sort((a,b)=>a-b);
+    const angB = [ angle(pB[1],pB[0],pB[2]), angle(pB[0],pB[1],pB[2]), angle(pB[0],pB[2],pB[1]) ].sort((a,b)=>a-b);
 
-  btnNewChallenge.addEventListener('click', ()=>{
-    level++; levelEl.innerText = level; presentPair();
+    const tol = TOL[sensitivity];
+
+    // ض.ض.ض
+    if( approx(sA[0],sB[0],tol) && approx(sA[1],sB[1],tol) && approx(sA[2],sB[2],tol) ){
+      return { method:'ض.ض.ض', farz:'سه ضلع متناظر برابرند.', hokm:'دو مثلث هم‌نهشت‌اند.', proof: sssProof() };
+    }
+    // ض.ز.ض  (دو ضلع و زاویه بین)
+    if( approx(sA[0],sB[0],tol) && approx(sA[2],sB[2],tol) && approx(angA[1],angB[1],ANG[sensitivity]) ){
+      return { method:'ض.ز.ض', farz:'دو ضلع و زاویهٔ بین آن‌ها برابرند.', hokm:'دو مثلث هم‌نهشت‌اند.', proof: sasProof() };
+    }
+    // ز.ض.ز
+    if( approx(angA[0],angB[0],ANG[sensitivity]) && approx(angA[2],angB[2],ANG[sensitivity]) && approx(sA[1],sB[1],tol) ){
+      return { method:'ز.ض.ز', farz:'دو زاویه و ضلع بین آن‌ها برابرند.', hokm:'دو مثلث هم‌نهشت‌اند.', proof: asaProof() };
+    }
+    // و.ض (مثلث‌های قائمه: وتر و یک ضلع)
+    if( isRight(pA) && isRight(pB) && approx(sA[1],sB[1],tol) ){
+      return { method:'و.ض', farz:'دو مثلث قائمه‌اند و وتر و یک ضلع قائمهٔ متناظر برابرند.', hokm:'دو مثلث قائمه هم‌نهشت‌اند.', proof: rhsProof() };
+    }
+    // و.ز (وتر و یک زاویه)
+    if( isRight(pA) && isRight(pB) && approx(angA[1],angB[1],ANG[sensitivity]) ){
+      return { method:'و.ز', farz:'دو مثلث قائمه‌اند و وتر و یک زاویهٔ متناظر برابرند.', hokm:'دو مثلث قائمه هم‌نهشت‌اند.', proof: rangleProof() };
+    }
+
+    return null;
+  }
+
+  // ---------- اثبات‌های متنی کوتاه (قابل گسترش) ----------
+  function sssProof(){
+    return 'فرض: سه ضلع متناظر برابرند. طبق قضیهٔ ض.ض.ض، دو مثلث هم‌نهشت‌اند (زاویه‌ها متناظر برابر خواهند شد).';
+  }
+  function sasProof(){
+    return 'فرض: دو ضلع و زاویهٔ بین‌شان برابرند. طبق ض.ز.ض، مثلث‌ها هم‌نهشت‌اند.';
+  }
+  function asaProof(){
+    return 'فرض: دو زاویه و ضلع میان آن‌ها برابر است. طبق ز.ض.ز، مثلث‌ها هم‌نهشت‌اند.';
+  }
+  function rhsProof(){
+    return 'فرض: دو مثلث قائمه‌اند و وتر و یک ضلع قائمه برابرند. طبق قضیهٔ و.ض => هم‌نهشتی.';
+  }
+  function rangleProof(){
+    return 'فرض: دو مثلث قائمه‌اند و وتر و یک زاویهٔ متناظر برابرند. طبق و.ز => هم‌نهشتی.';
+  }
+
+  // ---------- helpers برای تولید تصادفی (جفت) ----------
+  function randomTriangle(w,h){
+    return [
+      { x: 40 + Math.random()*(w-80), y: 40 + Math.random()*(h-80) },
+      { x: 40 + Math.random()*(w-80), y: 40 + Math.random()*(h-80) },
+      { x: 40 + Math.random()*(w-80), y: 40 + Math.random()*(h-80) }
+    ];
+  }
+
+  function transformCopy(pts){
+    // rotate + small scale + translate
+    const angleR = (Math.random()*2-1) * 1.6; // -1.6..1.6 rad
+    const scale = 0.92 + Math.random()*0.16;
+    const tx = 40 + Math.random()*80;
+    const ty = -20 + Math.random()*100;
+    const cx = canvasA.width/2, cy = canvasA.height/2;
+    return pts.map(p=>{
+      const x = p.x - cx, y = p.y - cy;
+      const rx = x*Math.cos(angleR) - y*Math.sin(angleR);
+      const ry = x*Math.sin(angleR) + y*Math.cos(angleR);
+      return { x: Math.round(rx*scale + cx + tx), y: Math.round(ry*scale + cy + ty) };
+    });
+  }
+
+  // ---------- تولید جفت جدید ----------
+  function newPair(){
+    tA = randomTriangle(canvasA.width, canvasA.height);
+    if(Math.random() < PROB_CONGRUENT){
+      tB = transformCopy(tA);
+      gameState.isCongruent = true;
+    } else {
+      tB = randomTriangle(canvasB.width, canvasB.height);
+      gameState.isCongruent = false;
+    }
+    drawTriangle(ctxA, tA, false); drawTriangle(ctxB, tB, false);
+    updateMetrics();
+    clearResult();
+    tone(880,0.06);
+  }
+
+  // ---------- UI actions ----------
+  btnLab.addEventListener('click', ()=> { labSection.classList.remove('hidden'); window.scrollTo({top:labSection.offsetTop, behavior:'smooth'}); });
+  document.getElementById('btnLabLarge').addEventListener('click', ()=> { labSection.classList.remove('hidden'); window.scrollTo({top:labSection.offsetTop, behavior:'smooth'}); });
+
+  btnNewPair.addEventListener('click', ()=> { level++; levelEl.innerText = level; newPair(); });
+  btnSnap.addEventListener('click', ()=> {
+    [tA, tB].forEach(tr=>{
+      for(let p of tr){ p.x = Math.round(p.x/12)*12; p.y = Math.round(p.y/12)*12; }
+    });
+    drawTriangle(ctxA,tA,false); drawTriangle(ctxB,tB,false); updateMetrics(); tone(720,0.04);
+  });
+  btnClear.addEventListener('click', ()=> {
+    tA=[]; tB=[]; drawTriangle(ctxA, [], false); drawTriangle(ctxB, [], false); updateMetrics(); clearResult(); tone(420,0.04);
   });
 
-  btnGuessYes.addEventListener('click', ()=>{ if(gameState.isCongruent===null){ alert('ابتدا چالش جدید بزن.'); return;} handleGuess(true); });
-  btnGuessNo.addEventListener('click', ()=>{ if(gameState.isCongruent===null){ alert('ابتدا چالش جدید بزن.'); return;} handleGuess(false); });
+  guessYes.addEventListener('click', ()=> { if(gameState.isCongruent===null){ alert('ابتدا «ارائه مثل جدید» بزن'); return; } handleGuess(true); });
+  guessNo.addEventListener('click', ()=> { if(gameState.isCongruent===null){ alert('ابتدا «ارائه مثل جدید» بزن'); return; } handleGuess(false); });
 
-  function handleGuess(guess){
-    if(guess === gameState.isCongruent){ score += 10; scoreEl.innerText = score; alert('حدس درست بود! حالا برای دیدن اثبات، روی «بررسی هم‌نهشتی» بزن.'); }
-    else alert('حدست اشتباه بود — روی «بررسی هم‌نهشتی» بزن تا ببینی چرا.');
+  function handleGuess(choice){
+    if(choice === gameState.isCongruent){
+      score += 10; scoreEl.innerText = score; alert('حدس درست! ✅ حالا برای دیدن تشخیص رسمی روی «بررسی هم‌نهشتی» بزن.');
+      tone(1200,0.06);
+    } else {
+      alert('حدس اشتباه بود. ❌ — روی «بررسی هم‌نهشتی» بزن تا علت را ببینی.');
+      tone(320,0.06);
+    }
   }
 
   btnCheck.addEventListener('click', ()=>{
-    if(!tA || !tB || tA.length!==3 || tB.length!==3){ alert('ابتدا چالش یا ارائه مثل جدید بزن.'); return; }
+    if(!tA || !tB || tA.length!==3 || tB.length!==3){ alert('ابتدا «ارائه مثل جدید» بزن.'); return; }
+    sensitivity = sensitivitySel ? sensitivitySel.value : 'med';
     const res = detectMethod(tA,tB);
-    showResult(res);
+    gameState.method = res ? res.method : null;
     if(res){ score += 5; scoreEl.innerText = score; }
+    showResult(res);
   });
 
-  // present example / replace clear
-  btnPresent.addEventListener('click', ()=>{
-    level++; levelEl.innerText = level;
-    // present educational pair (one likely congruent)
-    const base = [{x:80,y:240},{x:160,y:100},{x:260,y:240}];
-    tA = base;
-    tB = base.map(p=>({x:p.x+140,y:p.y-40}));
-    gameState.isCongruent = true;
-    drawTriangleOn(ctxA,tA,false); drawTriangleOn(ctxB,tB,false);
-    updateMetrics(); clearResult();
-    alert('مثل نمونه ارائه شد — روی «بررسی هم‌نهشتی» بزن.');
+  btnShowProof.addEventListener('click', ()=>{
+    if(!gameState.method){ alert('ابتدا «بررسی هم‌نهشتی» را بزن تا روش پیدا شود.'); return; }
+    // اجزای فرض، حکم، اثبات قبلاً در showResult نمایش دارد؛ فقط تاکید می‌کنیم
+    alert('در بخش نتایج، فرض/حکم/اثبات نمایش داده شده است.');
   });
 
-  // menu switching
-  btnLearn.addEventListener('click', ()=> { panelBuild.classList.add('hidden'); panelGame.classList.add('hidden'); learnCard.style.display='block'; });
-  btnBuild.addEventListener('click', ()=> { learnCard.style.display='none'; panelGame.classList.add('hidden'); panelBuild.classList.remove('hidden'); });
-  btnGame.addEventListener('click', ()=> { learnCard.style.display='none'; panelBuild.classList.add('hidden'); panelGame.classList.remove('hidden'); });
+  function showResult(res){
+    if(!res){ methodEl.innerText='—'; farzEl.innerText='—'; hokmEl.innerText='—'; proofEl.innerText='هیچ معیار هم‌نهشتی برقرار نیست.'; return; }
+    methodEl.innerText = res.method; farzEl.innerText = res.farz; hokmEl.innerText = res.hokm; proofEl.innerText = res.proof;
+  }
+  function clearResult(){ methodEl.innerText='—'; farzEl.innerText='—'; hokmEl.innerText='—'; proofEl.innerText='—'; }
 
-  // mute
-  btnMute.addEventListener('click', ()=> { muted = !muted; btnMute.innerText = muted ? '🔇' : '🔈 بی‌صدا'; });
+  // init: set empty canvases and metrics
+  drawTriangle(ctxA, [], false); drawTriangle(ctxB, [], false);
+  updateMetrics(); levelEl.innerText = level; scoreEl.innerText = score;
 
-  // init: show learn
-  learnCard.style.display='block';
-  panelBuild.classList.add('hidden'); panelGame.classList.add('hidden');
-  levelEl.innerText = level; scoreEl.innerText = score;
+  // expose for debug
+  window.newPair = newPair;
+  window.tA = tA; window.tB = tB;
 
 }); // DOMContentLoaded end
