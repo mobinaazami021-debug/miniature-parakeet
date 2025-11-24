@@ -2,36 +2,58 @@
 <html lang="fa">
 <head>
     <meta charset="UTF-8">
-    <title>آزمایشگاه هم‌نهشتی مثلث</title>
+    <title>آزمایشگاه هم‌نهشتی مثلث‌ها</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>آزمایشگاه هم‌نهشتی مثلث</h1>
+<div id="menu">
+    <h2>آزمایشگاه هم‌نهشتی مثلث‌ها</h2>
+    <p class="credit">ارائه‌دهنده: مبینا اعظمی — پایه ۹/۲ ـ مدرسه پردیس</p>
 
-<div class="buttons">
-    <button onclick="setMode('move')">
-        <img src="icons/move.png" class="icon"> انتقال
-    </button>
-
-    <button onclick="setMode('rotate')">
-        <img src="icons/rotate.png" class="icon"> چرخش
-    </button>
-
-    <button onclick="setMode('reflect')">
-        <img src="icons/reflect.png" class="icon"> بازتاب
-    </button>
-
-    <button onclick="setMode('scale')">
-        <img src="icons/scale.png" class="icon"> تغییر اندازه
-    </button>
+    <button onclick="showSection('learn')">آموزش</button>
+    <button onclick="showSection('builder')">ساخت مثلث</button>
+    <button onclick="showSection('game')">بازی</button>
+    <button onclick="newPair()">ارائه مثلث جدید</button>
 </div>
 
-<canvas id="cnv" width="500" height="400"></canvas>
 
-<audio id="clickSound">
-    <source src="click.mp3" type="audio/mpeg">
-</audio>
+<!-- 🔵 بخش آموزش -->
+<div id="learn" class="section">
+    <h3>آموزش</h3>
+    <p>در این آزمایشگاه می‌تونی مثلث بسازی، دو مثلث را مقایسه کنی و یاد بگیری چه زمانی دو مثلث هم‌نهشت هستند.</p>
+    <ul>
+        <li><b>ساخت مثلث:</b> با کلیک روی صفحه سه نقطه انتخاب کن و مثلث بساز.</li>
+        <li><b>بازی:</b> دو مثلث تصادفی نمایش داده می‌شود. باید تشخیص بدهی هم‌نهشت هستند یا نه.</li>
+        <li><b>ارائه مثلث جدید:</b> دو مثلث جدید با اندازه‌های واقعی تولید می‌شوند.</li>
+        <li><b>حالت‌های هم‌نهشتی:</b> ض‌.ض‌.ض — ض‌.ز‌.ض — ز‌.ض‌.ز — و‌.ض — و‌.ز</li>
+    </ul>
+</div>
+
+
+<!-- 🟢 بخش ساخت -->
+<div id="builder" class="section">
+    <h3>حالت ساخت مثلث</h3>
+    <p>روی صفحه شطرنجی کلیک کن تا سه نقطه بسازی.</p>
+    <canvas id="buildCanvas" width="600" height="400"></canvas>
+    <p id="buildData"></p>
+</div>
+
+
+<!-- 🔴 بخش بازی -->
+<div id="game" class="section">
+    <h3>بازی هم‌نهشتی</h3>
+
+    <div class="board-row">
+        <canvas id="triangle1" width="300" height="300"></canvas>
+        <canvas id="triangle2" width="300" height="300"></canvas>
+    </div>
+
+    <button onclick="checkAnswer(true)">هم‌نهشت هستند ✔</button>
+    <button onclick="checkAnswer(false)">هم‌نهشت نیستند ✖</button>
+
+    <div id="resultBox"></div>
+</div>
 
 <script src="script.js"></script>
 </body>
